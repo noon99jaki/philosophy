@@ -37,6 +37,15 @@ REL = {
     "contradiction":{"color": "#e0524a", "label": "contradiction / debate"},
 }
 
+# Short topic labels for the graph overlay (the full labels are too long on the map).
+SHORT = {
+    "arche": "Cosmic Origin", "change": "Change & Being", "reality": "Reality",
+    "self": "Self & Soul", "knowledge": "Knowledge", "divine": "The Divine",
+    "nature": "Human Nature", "good": "The Good Life", "ahimsa": "Compassion",
+    "order": "Political Order", "justice": "Cosmic Justice", "liberation": "Liberation",
+    "fate": "Fate & Freedom",
+}
+
 
 def main():
     els = {e["id"]: e for e in json.load(open(os.path.join(DATA, "elements.json"), encoding="utf-8"))}
@@ -83,8 +92,8 @@ def main():
         for e in members:
             stances.setdefault(e["stance"], []).append(e["id"])
         themes_out.append({
-            "key": key, "label": label, "blurb": blurb, "color": color,
-            "count": len(members),
+            "key": key, "label": label, "short": SHORT.get(key, label),
+            "blurb": blurb, "color": color, "count": len(members),
             "stances": [{"stance": s, "ids": ids} for s, ids in
                         sorted(stances.items(), key=lambda kv: -len(kv[1]))],
         })

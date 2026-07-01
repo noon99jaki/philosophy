@@ -83,6 +83,8 @@
   .tooltip{position:fixed;pointer-events:none;z-index:60;max-width:300px;padding:8px 11px;border-radius:9px;
     background:rgba(16,22,29,.97);border:1px solid var(--line);font-size:12.5px;color:var(--ink);opacity:0;transition:opacity .1s}
   text.nodelabel{font-family:inherit;font-size:11px;fill:var(--ink);paint-order:stroke;stroke:#0c1116;stroke-width:3px;pointer-events:none}
+  text.themelabel{font-family:inherit;font-size:14px;font-weight:600;letter-spacing:.7px;opacity:.85;paint-order:stroke;stroke:#0c1116;stroke-width:4px;text-transform:uppercase;pointer-events:none}
+  .btn.on{border-color:var(--gold);color:var(--gold2)}
 
   /* tree view */
   #treeWrap{display:none}
@@ -199,6 +201,7 @@
     </div>
     <input type="search" id="search" placeholder="🔎 search a thinker, idea or keyword (e.g. atoms, soul, justice, 道)…" autocomplete="off">
     <span id="matchcount"></span>
+    <button class="btn on" id="toggleTopics">🗺 Topics</button>
     <button class="btn" id="relax">✦ Relax layout</button>
     <button class="btn" id="reset">⟲ Reset view</button>
   </div>
@@ -382,6 +385,29 @@ DATA.nodes.forEach(n=>{
   c.addEventListener("dblclick",ev=>{ev.stopPropagation();if(n.source_url)window.open(n.source_url,"_blank","noopener");});
 });
 
+/* ---- topic overlay: superimpose the taxonomy themes as text labels only ---- */
+const gThemeLabels=svgEl("g",{}); vp.append(gThemeLabels);   // labels on top of everything
+let showThemes=true;
+const themeMembers={};
+DATA.nodes.forEach(n=>{(themeMembers[n.theme]=themeMembers[n.theme]||[]).push(n.id);});
+const themeVis=DATA.themes.map(th=>{
+  const label=svgEl("text",{"text-anchor":"middle"}); label.setAttribute("class","themelabel");
+  label.textContent=th.short||th.label; label.style.fill=th.color;
+  gThemeLabels.append(label);
+  return {label,ids:themeMembers[th.key]||[]};
+});
+function renderThemeLayer(){
+  for(const t of themeVis){
+    const pts=t.ids.map(id=>nodeById.get(id)).filter(visible);
+    if(!showThemes||pts.length<2){t.label.style.display="none";continue;}
+    let cx=0, minY=Infinity;                       // label sits above the top of its cluster
+    for(const p of pts){cx+=p.x; if(p.y<minY)minY=p.y;} cx/=pts.length;
+    t.label.style.display="";
+    t.label.setAttribute("x", view.x+cx*view.k);
+    t.label.setAttribute("y", view.y+minY*view.k - 9);
+  }
+}
+
 /* semantic zoom: node POSITIONS scale with view.k, but node/label/edge SIZES stay
    constant (in screen px) — so zooming in spreads nodes apart and de-crowds them. */
 function project(n){return [view.x + n.x*view.k, view.y + n.y*view.k];}
@@ -392,6 +418,7 @@ function redraw(){
   for(const n of DATA.nodes){const p=project(n);
     n._c.setAttribute("cx",p[0]);n._c.setAttribute("cy",p[1]);
     n._lab.setAttribute("x",p[0]);n._lab.setAttribute("y",p[1]-n._r-6);}
+  renderThemeLayer();
 }
 function fitView(){
   const xs=DATA.nodes.map(n=>n.x),ys=DATA.nodes.map(n=>n.y);
@@ -455,6 +482,7 @@ function applyFilters(){
   DATA.nodes.forEach(n=>{const v=visible(n);n._c.style.display=v?"":"none";n._lab.style.display="none";});
   DATA.edges.forEach(e=>{e._ln.style.display=edgeVisible(e)?"":"none";});
   if(selected&&visible(selected))highlight(selected);else clearHi();
+  renderThemeLayer();                        // topic regions follow the visible nodes
   renderHighlights();                       // filters also drive the bridges/debates pane
   if(curView==="tree") renderTree();         // …and the taxonomy tree
 }
@@ -666,6 +694,7 @@ $("#relax").onclick=()=>{
   redraw();
 };
 $("#reset").onclick=()=>{DATA.nodes.forEach(n=>{n.x=n.x0;n.y=n.y0;updateNode(n);});resetAllFilters();};
+$("#toggleTopics").onclick=()=>{showThemes=!showThemes;$("#toggleTopics").classList.toggle("on",showThemes);renderThemeLayer();};
 
 /* ---------------- go ---------------- */
 fitView(); showHubLabels(); renderTree(); renderHighlights();
