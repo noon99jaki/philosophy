@@ -8,7 +8,7 @@ cross-cultural "bridges" (equivalences spanning civilizations) and "debates"
 import os
 import json
 
-from knowledge import THEMES, TERMS, AUTHOR_ROMAN, BIRTH, ROMAN
+from knowledge import THEMES, TERMS, AUTHOR_ROMAN, BIRTH, ROMAN, STMT, STATEMENT_LANG
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -52,7 +52,13 @@ def main():
         #   name  = the author / work (native name, cuneiform romanized)
         #   idea  = the concept itself (quote > native term)
         name_text = AUTHOR_ROMAN.get(e["thinker"], e["thinker_native"])
-        idea_text = e["quote"]["o"] if e["quote"] else (TERMS.get(nid) or e["thinker_native"])
+        term = TERMS.get(nid)                     # (native, English gloss) or None
+        if e["quote"]:
+            idea_text, idea_en = e["quote"]["o"], e["quote"]["e"]
+        elif term:
+            idea_text, idea_en = term[0], term[1]
+        else:
+            idea_text, idea_en = e["thinker_native"], ""
         nodes.append({
             "id": nid, "label": e["thinker"], "native": e["thinker_native"],
             "year": BIRTH.get(e["thinker"], ""),
@@ -60,11 +66,12 @@ def main():
             "theme": e["theme"], "theme_label": e["theme_label"], "stance": e["stance"],
             "type": e["type"], "degree": n["degree"], "x": n["x"], "y": n["y"],
             "text": e["text"], "quote": e["quote"], "source_url": e["source_url"],
+            "stmt": {"native": STMT.get(nid, ""), "lang": STATEMENT_LANG.get(e["civ"], "")},
             "evidence": [ev["text"] for ev in e["evidence"]],
             "speak": {"name": {"text": name_text, "lang": detect_lang(name_text),
                                "roman": ROMAN.get(name_text, "")},
                       "idea": {"text": idea_text, "lang": detect_lang(idea_text),
-                               "roman": ROMAN.get(idea_text, "")}},
+                               "roman": ROMAN.get(idea_text, ""), "en": idea_en}},
             "auto_cluster": n["auto_cluster"],
         })
 

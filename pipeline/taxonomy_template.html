@@ -140,6 +140,14 @@
   .iconspk{cursor:pointer;font-size:11px;line-height:1;padding:2px 6px;border-radius:5px;border:1px solid var(--line);background:transparent;color:var(--gold2);flex:0 0 auto;align-self:center}
   .iconspk:hover{border-color:var(--gold);background:var(--card2)}
   .eh{gap:6px}
+  .stmtrow{display:flex;align-items:flex-start;gap:7px;margin:6px 0}
+  .stmtrow .stx{flex:1 1 auto}
+  .ntext{color:#c6d2dc}
+  .pntext{color:#c6d2dc;font-size:14px}
+  .pnameline{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .pquote2{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 7px;margin:9px 0}
+  .pquote2 .qo{font-size:15px;color:var(--gold2)}
+  .pquote2 .qe{font-size:12.5px;color:var(--muted);font-style:italic}
   .ecard a.en{color:var(--ink);border-bottom:1px dotted transparent}
   .ecard a.en:hover{border-bottom-color:var(--gold);color:var(--gold2)}
   .cardsrc{display:inline-block;margin-top:7px;font-size:11px;color:var(--gold);border-bottom:1px dotted rgba(227,179,65,.45)}
@@ -200,7 +208,7 @@
     <div class="fgroup" id="relFilter"><span class="lbl">Relations:</span></div>
   </div>
 
-  <details class="hl" open>
+  <details class="hl">
     <summary>✶ Cross-cultural bridges &amp; great debates <span style="color:var(--faint);font-weight:400;font-size:12.5px">— click any to focus it in the map</span></summary>
     <div class="hlgrid">
       <div class="hlcol"><h4 style="color:var(--eq)">Bridges — the same idea, different civilizations</h4><div id="bridges"></div></div>
@@ -226,6 +234,7 @@
 
   <footer>
     <b>How this was built.</b> A four-stage pipeline: (1) <span class="mono">download</span> all sources from index.html in a uniform format; (2) <span class="mono">elementize</span> — segment the corpus into sentences and distill atomic concepts/rules; (3) <span class="mono">relate</span> — TF-IDF cosine similarity plus stance &amp; antonym logic classify equivalence / similarity / contradiction, and agglomerative clustering groups the ideas; (4) <span class="mono">visualize</span> this page. Equivalence/contradiction use curated <i>stance</i> labels documenting scholarly debates; similarity edges are discovered automatically from text. <span id="agree"></span>
+    <br><br><b>A note on the native language.</b> Each idea's <i>key term / quote</i> — πάντα ῥεῖ, 道可道，非常道, תת… — is authentic text taken from the original sources (and its 🔊 uses that language's voice, with a romanized fallback where no voice exists). The fuller <i>native statement</i> shown beneath it is an <b>AI-generated modern translation</b> — Modern Greek, Mandarin, Hindi, Persian, Modern Hebrew, and Arabic for Egypt &amp; Mesopotamia (whose ancient tongues have no speech synthesis) — offered for reading and pronunciation, <i>not</i> as a sourced original; it may contain occasional phrasing errors.
   </footer>
 </div>
 
@@ -283,6 +292,13 @@ function iconSpeak(s){                 // icon-only pronounce button (no text)
   const b = el("button", {class:"iconspk", title:"pronounce — "+langName(s.lang)}, "🔊");
   b.onclick = ev => { ev.stopPropagation(); speak(s); };
   return b;
+}
+function stmtRow(text, s, cls){        // a statement line with an inline icon-only voice button
+  const row = el("div", {class:"stmtrow"});
+  const t = el("div", {class:(cls||"")+" stx"}, text);
+  if(/^(he|ar|fa)/.test(s.lang||"")) t.setAttribute("dir","rtl");
+  row.append(t, iconSpeak(s));
+  return row;
 }
 
 /* ---------------- stats + legend + filters ---------------- */
@@ -488,21 +504,23 @@ function cssId(s){return s.replace(/[^a-z0-9]/gi,"_");}
 
 function renderPanel(n){
   $("#panelEmpty").style.display="none";const b=$("#panelBody");b.style.display="";b.innerHTML="";
-  b.append(el("a",{class:"pname",href:n.source_url,target:"_blank",rel:"noopener",title:"open the original text"},n.label+" "),
+  const nl=el("div",{class:"pnameline"});
+  nl.append(el("a",{class:"pname",href:n.source_url,target:"_blank",rel:"noopener",title:"open the original text"},n.label+" "),
     n.year?el("span",{class:"pyear"},"("+n.year+") "):document.createTextNode(""),
-    el("span",{class:"pnat"},n.native));
+    el("span",{class:"pnat"},n.native), iconSpeak(n.speak.name));       // name voice button, next to the name
+  b.append(nl);
   const meta=el("div",{class:"meta"});
   const t1=el("span",{class:"tag"},n.civ);t1.style.borderColor=n.color;t1.style.color=n.color;
   meta.append(t1,el("span",{class:"tag"},n.school),el("span",{class:"tag"},n.type),
     el("span",{class:"tag"},n.theme_label),el("span",{class:"tag"},"stance: "+n.stance));
   b.append(meta);
-  b.append(el("div",{class:"ptext"},"“"+n.text+"”"));
-  if(n.quote){const q=el("a",{class:"pquote",href:n.source_url,target:"_blank",rel:"noopener",title:"open the original text"});
-    q.append(el("span",{class:"qo"},n.quote.o),el("span",{class:"qe"},"“"+n.quote.e+"”"));b.append(q);}
-  if(n.speak){const sr=el("div",{class:"speakrow"});
-    sr.append(el("span",{class:"speaklbl"},"Pronounce —"),
-      speakBtn("name",n.speak.name,"speak"),speakBtn("idea",n.speak.idea,"speak"));
-    b.append(sr);}
+  b.append(stmtRow("“"+n.text+"”", {text:n.text, lang:"en-US"}, "ptext"));                    // English statement + voice
+  if(n.stmt.native) b.append(stmtRow(n.stmt.native, {text:n.stmt.native, lang:n.stmt.lang}, "pntext")); // native statement + voice
+  if(n.speak.idea.text){const q=el("div",{class:"pquote2"});                                  // key term/quote + voice
+    q.append(el("span",{class:"qo"},n.speak.idea.text));
+    if(n.speak.idea.en) q.append(el("span",{class:"qe"},"“"+n.speak.idea.en+"”"));
+    q.append(iconSpeak(n.speak.idea));
+    b.append(q);}
   if(n.evidence&&n.evidence.length){b.append(el("h5",{},"From the source text — click to read in context"));
     n.evidence.forEach(ev=>{const a=el("a",{class:"ev",href:n.source_url,target:"_blank",rel:"noopener"});
       a.textContent="“"+ev+"”";b.append(a);});}
@@ -527,7 +545,7 @@ function flagPill(civ){const p=el("span",{class:"cc"},civ);p.style.borderColor=D
 function quoteBlock(id){                     // dual-language quotation + a voice button per language
   const n=nodeById.get(id);
   const orig=n.speak.idea.text, olang=n.speak.idea.lang;
-  const eng = n.quote ? n.quote.e : n.text;
+  const eng = n.speak.idea.en || n.text;     // English counterpart of the term/quote (matched length)
   const w=el("div",{class:"qblock"});
   w.append(el("div",{class:"qname"}, withYear(n)+" · "+n.civ));
   const line=el("div",{class:"qline"});
@@ -585,7 +603,7 @@ function renderTree(){
   DATA.themes.forEach(th=>{
     const vis=th.stances.some(s=>s.ids.some(id=>visible(nodeById.get(id))));
     if(!vis)return;
-    const d=el("details",{class:"theme-d"});d.style.setProperty("--tc",th.color);d.open=true;
+    const d=el("details",{class:"theme-d"});d.style.setProperty("--tc",th.color);if(searchHit)d.open=true;
     const sm=el("summary");
     sm.append(el("span",{class:"tw"},"▶"),el("span",{class:"tname"},th.label),
       el("span",{class:"tcount"},th.count+" ideas"),el("span",{class:"tblurb"},th.blurb));
@@ -603,10 +621,12 @@ function renderTree(){
         name.onclick=ev=>ev.stopPropagation();
         h.append(dot,name,n.year?el("span",{class:"eyear"},"("+n.year+")"):document.createTextNode(""),
           el("span",{class:"enat"},n.native), iconSpeak(n.speak.name));   // name voice button, next to the native name
-        c.append(h,el("div",{class:"etext"},n.text));
-        const q=el("div",{class:"equote"});                              // idea/quote line + its voice button
+        c.append(h);
+        c.append(stmtRow(n.text, {text:n.text, lang:"en-US"}, "etext"));                     // English statement + voice
+        if(n.stmt.native) c.append(stmtRow(n.stmt.native, {text:n.stmt.native, lang:n.stmt.lang}, "ntext"));  // native statement + voice
+        const q=el("div",{class:"equote"});                              // native idea + its English gloss + voice button
         q.append(el("span",{class:"qo"},n.speak.idea.text));
-        if(n.quote) q.append(el("span",{class:"qe"},"“"+n.quote.e+"”"));
+        if(n.speak.idea.en) q.append(el("span",{class:"qe"},"“"+n.speak.idea.en+"”"));
         q.append(iconSpeak(n.speak.idea));
         c.append(q);
         const src=el("a",{class:"cardsrc",href:n.source_url,target:"_blank",rel:"noopener"},"read in context");
