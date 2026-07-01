@@ -8,7 +8,7 @@ cross-cultural "bridges" (equivalences spanning civilizations) and "debates"
 import os
 import json
 
-from knowledge import THEMES, TERMS, AUTHOR_ROMAN
+from knowledge import THEMES, TERMS, AUTHOR_ROMAN, BIRTH
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -55,6 +55,7 @@ def main():
         idea_text = e["quote"]["o"] if e["quote"] else (TERMS.get(nid) or e["thinker_native"])
         nodes.append({
             "id": nid, "label": e["thinker"], "native": e["thinker_native"],
+            "year": BIRTH.get(e["thinker"], ""),
             "civ": e["civ"], "color": n["color"], "school": e["school"],
             "theme": e["theme"], "theme_label": e["theme_label"], "stance": e["stance"],
             "type": e["type"], "degree": n["degree"], "x": n["x"], "y": n["y"],

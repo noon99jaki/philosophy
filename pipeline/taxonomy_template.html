@@ -140,6 +140,8 @@
   .cardsrc::before{content:"📜 "}
   #matchcount{font-size:12.5px;color:var(--faint);white-space:nowrap;align-self:center}
   a.pname{text-decoration:none;color:var(--ink)}a.pname:hover{color:var(--gold2)}
+  .pyear{color:var(--faint);font-size:13px;font-weight:400}
+  .eyear{color:var(--faint);font-size:11.5px;margin-left:1px}
   .speak{cursor:pointer;font:inherit;font-size:12.5px;padding:5px 11px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--gold2)}
   .speak:hover{border-color:var(--gold);color:var(--gold)}
   .speak:active{transform:translateY(1px)}
@@ -230,6 +232,7 @@ DATA.nodes.forEach(n=>{ n.x0=n.x; n.y0=n.y; });
 let activeCivs = new Set(DATA.civs);
 let activeRels = new Set(Object.keys(DATA.relTypes));
 let selected = null;
+function withYear(n){return n && n.year ? `${n.label} (${n.year})` : (n ? n.label : "");}
 
 /* ---------------- speech: pronounce a concept in its original language ---------------- */
 let _voices = [];
@@ -314,7 +317,7 @@ DATA.nodes.forEach(n=>{
   c.style.fill=n.color; c.style.stroke="#0c1116"; c.style.strokeWidth=1.4; c.style.cursor="pointer";
   n._c=c; n._r=r; gNodes.append(c);
   const lab=svgEl("text",{x:n.x,y:n.y-r-4,"text-anchor":"middle"});
-  lab.setAttribute("class","nodelabel"); lab.textContent=n.label; lab.style.display="none";
+  lab.setAttribute("class","nodelabel"); lab.textContent=withYear(n); lab.style.display="none";
   n._lab=lab; gLabels.append(lab);
   c.addEventListener("mouseenter",ev=>hover(n,ev));
   c.addEventListener("mousemove",ev=>moveTip(ev));
@@ -348,7 +351,7 @@ function showHubLabels(){DATA.nodes.forEach(n=>{n._lab.style.display=(visible(n)
 /* ---------------- interactions ---------------- */
 const tip=$("#tip");
 function hover(n,ev){ if(!visible(n))return; highlight(n); n._lab.style.display="";
-  tip.innerHTML=`<b>${n.label}</b> <span style="color:var(--muted)">${n.native}</span> · <span style="color:${n.color}">${n.civ}</span><br><span style="color:var(--gold2);font-size:11.5px">${n.theme_label} — ${n.stance}</span><br>${n.text}`;
+  tip.innerHTML=`<b>${n.label}</b>${n.year?` <span style="color:var(--faint)">(${n.year})</span>`:""} <span style="color:var(--muted)">${n.native}</span> · <span style="color:${n.color}">${n.civ}</span><br><span style="color:var(--gold2);font-size:11.5px">${n.theme_label} — ${n.stance}</span><br>${n.text}`;
   tip.style.opacity=1; moveTip(ev); }
 function moveTip(ev){tip.style.left=Math.min(ev.clientX+14,innerWidth-310)+"px";tip.style.top=(ev.clientY+16)+"px";}
 function hideTip(){tip.style.opacity=0;}
@@ -425,7 +428,7 @@ $("#search").addEventListener("input",e=>{
   if(!q){searchHit=null;$("#matchcount").textContent="";applyFilters();renderTree();if(curView==="graph")fitView();return;}
   searchHit=new Set();
   DATA.nodes.forEach(n=>{
-    const hay=(n.label+" "+n.native+" "+n.civ+" "+n.text+" "+n.theme_label+" "+n.stance+" "+n.school+
+    const hay=(n.label+" "+n.native+" "+n.civ+" "+n.year+" "+n.text+" "+n.theme_label+" "+n.stance+" "+n.school+
       " "+(n.quote?n.quote.o+" "+n.quote.e:"")+" "+(n.speak?n.speak.idea.text+" "+n.speak.name.text:"")).toLowerCase();
     if(hay.includes(q))searchHit.add(n.id);});
   if(!searchHit.size){searchHit=null;$("#matchcount").textContent="✕ no matches";applyFilters();renderTree();return;}
@@ -445,6 +448,7 @@ function cssId(s){return s.replace(/[^a-z0-9]/gi,"_");}
 function renderPanel(n){
   $("#panelEmpty").style.display="none";const b=$("#panelBody");b.style.display="";b.innerHTML="";
   b.append(el("a",{class:"pname",href:n.source_url,target:"_blank",rel:"noopener",title:"open the original text"},n.label+" "),
+    n.year?el("span",{class:"pyear"},"("+n.year+") "):document.createTextNode(""),
     el("span",{class:"pnat"},n.native));
   const meta=el("div",{class:"meta"});
   const t1=el("span",{class:"tag"},n.civ);t1.style.borderColor=n.color;t1.style.color=n.color;
@@ -472,7 +476,7 @@ function renderPanel(n){
     b.append(el("h5",{},DATA.relTypes[tp].label+" ("+groups[tp].length+")"));
     groups[tp].forEach(([oid,e])=>{const m=nodeById.get(oid);
       const row=el("div",{class:"rel"});const k=el("span",{class:"rk"},marks[tp]);k.style.color=DATA.relTypes[tp].color;
-      const tx=el("div");tx.append(el("div",{class:"rt"},m.label+" · "+m.civ),el("div",{class:"rx"},m.text));
+      const tx=el("div");tx.append(el("div",{class:"rt"},withYear(m)+" · "+m.civ),el("div",{class:"rx"},m.text));
       row.append(k,tx);row.onclick=()=>select(m);b.append(row);});
   });
 }
@@ -484,7 +488,7 @@ function flagPill(civ){const p=el("span",{class:"cc"},civ);p.style.borderColor=D
   DATA.highlights.bridges.forEach(br=>{
     const d=el("div",{class:"bridge"});
     const who=el("div",{class:"who"});
-    who.append(flagPill(br.ca),el("b",{},br.ta),el("span",{style:"color:var(--eq);font-weight:700"},"  =  "),el("b",{},br.tb),flagPill(br.cb),el("span",{class:"th"},br.theme));
+    who.append(flagPill(br.ca),el("b",{},withYear(nodeById.get(br.a))),el("span",{style:"color:var(--eq);font-weight:700"},"  =  "),el("b",{},withYear(nodeById.get(br.b))),flagPill(br.cb),el("span",{class:"th"},br.theme));
     d.append(who,el("div",{class:"ex"},"“"+br.xa+"”  ·  “"+br.xb+"”"));
     d.onclick=()=>focusPair(br.a,br.b); bx.append(d);
   });
@@ -493,7 +497,7 @@ function flagPill(civ){const p=el("span",{class:"cc"},civ);p.style.borderColor=D
     const d=el("div",{class:"bridge deb"});
     const who=el("div",{class:"who"});
     const vs=el("span",{style:"color:var(--con);font-weight:700"},"  ✕  ");
-    who.append(flagPill(db.ca),el("b",{},db.ta),vs,el("b",{},db.tb),flagPill(db.cb),el("span",{class:"th"},db.theme));
+    who.append(flagPill(db.ca),el("b",{},withYear(nodeById.get(db.a))),vs,el("b",{},withYear(nodeById.get(db.b))),flagPill(db.cb),el("span",{class:"th"},db.theme));
     d.append(who,el("div",{class:"ex"},"“"+db.xa+"”  vs  “"+db.xb+"”"));
     d.onclick=()=>focusPair(db.a,db.b); dx.append(d);
   });
@@ -529,7 +533,7 @@ function renderTree(){
         dot.style.cssText=`width:10px;height:10px;border-radius:50%;background:${n.color};flex:0 0 auto`;
         const name=el("a",{class:"en",href:n.source_url,target:"_blank",rel:"noopener",title:"open the original text"},n.label);
         name.onclick=ev=>ev.stopPropagation();
-        h.append(dot,name,el("span",{class:"enat"},n.native));
+        h.append(dot,name,n.year?el("span",{class:"eyear"},"("+n.year+")"):document.createTextNode(""),el("span",{class:"enat"},n.native));
         c.append(h,el("div",{class:"etext"},n.text));
         if(n.quote){const q=el("a",{class:"equote",href:n.source_url,target:"_blank",rel:"noopener"});
           q.append(el("span",{class:"qo"},n.quote.o),el("span",{class:"qe"},"“"+n.quote.e+"”"));

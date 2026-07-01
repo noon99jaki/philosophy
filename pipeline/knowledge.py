@@ -607,3 +607,36 @@ AUTHOR_ROMAN = {
     "Instructions of Shuruppak": "Šuruppak", "Epic of Gilgamesh": "Gilgāmeš",
     "Hammurabi": "Ḫammurabi", "Enuma Elish": "Enūma Eliš",
 }
+
+# Year of birth for persons (BCE); for anonymous texts, approximate composition/era date.
+BIRTH = {
+    # Greece
+    "Thales": "c. 624 BCE", "Anaximander": "c. 610 BCE", "Anaximenes": "c. 586 BCE",
+    "Pythagoras": "c. 570 BCE", "Xenophanes": "c. 570 BCE", "Heraclitus": "c. 535 BCE",
+    "Parmenides": "c. 515 BCE", "Zeno of Elea": "c. 490 BCE", "Empedocles": "c. 494 BCE",
+    "Anaxagoras": "c. 500 BCE", "Democritus": "c. 460 BCE", "Protagoras": "c. 490 BCE",
+    "Gorgias": "c. 483 BCE", "Socrates": "470 BCE", "Plato": "c. 428 BCE",
+    "Aristotle": "384 BCE", "Diogenes": "c. 412 BCE", "Epicurus": "341 BCE",
+    "Zeno of Citium": "c. 334 BCE",
+    # China
+    "Confucius": "551 BCE", "Mencius": "c. 372 BCE", "Xunzi": "c. 310 BCE",
+    "Laozi": "c. 571 BCE", "Zhuangzi": "c. 369 BCE", "Mozi": "c. 470 BCE",
+    "Shang Yang": "c. 390 BCE", "Han Feizi": "c. 280 BCE", "Sun Tzu": "c. 544 BCE",
+    "Gongsun Long": "c. 320 BCE",
+    # India
+    "Vedas": "c. 1500 BCE", "Upanishads": "c. 800 BCE", "Mahavira": "c. 599 BCE",
+    "Buddha": "c. 563 BCE", "Makkhali Gosala": "c. 500 BCE", "Carvaka": "c. 600 BCE",
+    "Kapila": "c. 550 BCE", "Panini": "c. 500 BCE",
+    # Persia
+    "Zoroaster": "c. 1000 BCE",
+    # Israel (texts)
+    "Proverbs": "c. 600 BCE", "Ecclesiastes": "c. 300 BCE", "Job": "c. 500 BCE",
+    "Torah": "c. 600 BCE", "Prophets": "c. 750 BCE",
+    # Egypt
+    "Ptahhotep": "c. 2400 BCE", "Amenemope": "c. 1300 BCE", "Akhenaten": "c. 1353 BCE",
+    "Dispute with the Ba": "c. 1900 BCE", "Book of the Dead": "c. 1550 BCE",
+    # Mesopotamia
+    "Instructions of Shuruppak": "c. 2600 BCE", "Epic of Gilgamesh": "c. 2100 BCE",
+    "Babylonian Theodicy": "c. 1000 BCE", "Dialogue of Pessimism": "c. 1000 BCE",
+    "Hammurabi": "c. 1810 BCE", "Enuma Elish": "c. 1200 BCE",
+}
