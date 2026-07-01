@@ -608,6 +608,12 @@ AUTHOR_ROMAN = {
     "Hammurabi": "Ḫammurabi", "Enuma Elish": "Enūma Eliš",
 }
 
+# Romanized speech fallback for scripts most systems have no TTS voice for (Persian/
+# Avestan in Arabic script): if no matching voice is found, the button reads this instead.
+ROMAN = {
+    "زرتشت": "Zarathushtra", "اهورا مزدا": "Ahura Mazda", "اشا": "Asha",
+}
+
 # Year of birth for persons (BCE); for anonymous texts, approximate composition/era date.
 BIRTH = {
     # Greece

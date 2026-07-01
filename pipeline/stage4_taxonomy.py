@@ -8,7 +8,7 @@ cross-cultural "bridges" (equivalences spanning civilizations) and "debates"
 import os
 import json
 
-from knowledge import THEMES, TERMS, AUTHOR_ROMAN, BIRTH
+from knowledge import THEMES, TERMS, AUTHOR_ROMAN, BIRTH, ROMAN
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -61,8 +61,10 @@ def main():
             "type": e["type"], "degree": n["degree"], "x": n["x"], "y": n["y"],
             "text": e["text"], "quote": e["quote"], "source_url": e["source_url"],
             "evidence": [ev["text"] for ev in e["evidence"]],
-            "speak": {"name": {"text": name_text, "lang": detect_lang(name_text)},
-                      "idea": {"text": idea_text, "lang": detect_lang(idea_text)}},
+            "speak": {"name": {"text": name_text, "lang": detect_lang(name_text),
+                               "roman": ROMAN.get(name_text, "")},
+                      "idea": {"text": idea_text, "lang": detect_lang(idea_text),
+                               "roman": ROMAN.get(idea_text, "")}},
             "auto_cluster": n["auto_cluster"],
         })
 

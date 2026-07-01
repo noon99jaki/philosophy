@@ -134,6 +134,12 @@
   a.ev{display:block;text-decoration:none}a.ev:hover{color:var(--ink)}
   a.equote{display:block;text-decoration:none;margin-top:5px}
   a.equote .qo{font-size:12.5px}a.equote .qe{font-size:11px}
+  .equote{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 7px;margin-top:5px}
+  .equote .qo{display:inline;font-size:12.5px}
+  .equote .qe{display:inline;font-size:11px}
+  .iconspk{cursor:pointer;font-size:11px;line-height:1;padding:2px 6px;border-radius:5px;border:1px solid var(--line);background:transparent;color:var(--gold2);flex:0 0 auto;align-self:center}
+  .iconspk:hover{border-color:var(--gold);background:var(--card2)}
+  .eh{gap:6px}
   .ecard a.en{color:var(--ink);border-bottom:1px dotted transparent}
   .ecard a.en:hover{border-bottom-color:var(--gold);color:var(--gold2)}
   .cardsrc{display:inline-block;margin-top:7px;font-size:11px;color:var(--gold);border-bottom:1px dotted rgba(227,179,65,.45)}
@@ -152,6 +158,13 @@
   .speakmini:hover{border-color:var(--gold);background:var(--card2)}
   .speakpair{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
   .speaklbl{font-size:12px;color:var(--faint);align-self:center;margin-right:2px}
+  .qblock{margin:7px 0 3px;padding:5px 10px;border-left:2px solid var(--line);border-radius:0 6px 6px 0}
+  .qname{font-size:11px;color:var(--faint);margin-bottom:2px}
+  .qline{font-size:12.5px;line-height:1.45}
+  .qo2{color:var(--gold2);margin-right:7px}
+  .qe2{color:var(--muted);font-style:italic}
+  .qbtns{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+  .hlnone{color:var(--faint);font-size:12.5px;font-style:italic;padding:6px 2px}
   .stat.clickable{cursor:pointer;transition:.12s}
   .stat.clickable:hover{border-color:var(--gold);color:var(--ink);background:var(--card2)}
   .stat.clickable b{pointer-events:none}
@@ -239,19 +252,37 @@ let _voices = [];
 function _loadVoices(){ try{ _voices = window.speechSynthesis.getVoices() || []; }catch(e){} }
 if (typeof window !== "undefined" && window.speechSynthesis){ _loadVoices(); window.speechSynthesis.onvoiceschanged = _loadVoices; }
 function langName(l){ return {"el-GR":"Greek","zh-CN":"Chinese","he-IL":"Hebrew","hi-IN":"Sanskrit","fa-IR":"Persian"}[l] || "original"; }
-function speak(text, lang){
+function pickVoice(lang){
+  if(!lang) return null;
+  const fam = lang.slice(0,2).toLowerCase();
+  const prefs = ({fa:["fa","ar"], ur:["ur","ar"]})[fam] || [fam];   // Persian → Persian voice, else Arabic
+  for(const p of prefs){
+    const v=_voices.find(v=>v.lang && v.lang.toLowerCase().replace("_","-").startsWith(p));
+    if(v) return v;
+  }
+  return null;
+}
+function speak(s){
+  if(typeof s==="string") s={text:s, lang:""};
   if(!(window.speechSynthesis && window.SpeechSynthesisUtterance)){ alert("Sorry — your browser doesn't support speech synthesis."); return; }
   window.speechSynthesis.cancel();
+  const v = pickVoice(s.lang);
+  let text = s.text, lang = s.lang;
+  if(!v && s.roman){ text = s.roman; lang = ""; }   // no voice for this script → read the romanization aloud
   const u = new SpeechSynthesisUtterance(text);
-  if(lang){ u.lang = lang; const p = lang.slice(0,2).toLowerCase();
-    const v = _voices.find(v => v.lang && v.lang.toLowerCase().replace("_","-").startsWith(p)); if(v) u.voice = v; }
+  if(v){ u.voice = v; u.lang = v.lang; } else if(lang){ u.lang = lang; }
   u.rate = 0.85; window.speechSynthesis.speak(u);
 }
 function speakBtn(role, s, cls){   // s = {text, lang}
   const btn = el("button", {class: cls || "speakmini", title: "pronounce the "+role+" — "+langName(s.lang)});
   btn.textContent = "🔊 " + s.text;
-  btn.onclick = ev => { ev.stopPropagation(); speak(s.text, s.lang); };
+  btn.onclick = ev => { ev.stopPropagation(); speak(s); };
   return btn;
+}
+function iconSpeak(s){                 // icon-only pronounce button (no text)
+  const b = el("button", {class:"iconspk", title:"pronounce — "+langName(s.lang)}, "🔊");
+  b.onclick = ev => { ev.stopPropagation(); speak(s); };
+  return b;
 }
 
 /* ---------------- stats + legend + filters ---------------- */
@@ -281,7 +312,11 @@ function speakBtn(role, s, cls){   // s = {text, lang}
     const p=el("span",{class:"pill",'data-civ':c});
     const d=el("span",{class:"dot"});d.style.background=DATA.civColors[c]||"#999";
     p.append(d,document.createTextNode(c));
-    p.onclick=()=>{p.classList.toggle("off");if(activeCivs.has(c))activeCivs.delete(c);else activeCivs.add(c);applyFilters();};
+    p.onclick=()=>{                              // click = isolate this civ (deselect the rest); click the sole one again = restore all
+      const solo = activeCivs.size===1 && activeCivs.has(c);
+      activeCivs = solo ? new Set(DATA.civs) : new Set([c]);
+      syncCivPills(); applyFilters();
+    };
     cf.append(p);
   });
   // rel filter
@@ -290,7 +325,11 @@ function speakBtn(role, s, cls){   // s = {text, lang}
     const p=el("span",{class:"pill edge",'data-rel':k});
     const d=el("span",{class:"dot"});d.style.background=v.color;
     p.append(d,document.createTextNode(k));
-    p.onclick=()=>{p.classList.toggle("off");if(activeRels.has(k))activeRels.delete(k);else activeRels.add(k);applyFilters();};
+    p.onclick=()=>{                              // click = isolate this relation type; click the sole one again = restore all
+      const solo = activeRels.size===1 && activeRels.has(k);
+      activeRels = solo ? new Set(Object.keys(DATA.relTypes)) : new Set([k]);
+      syncRelPills(); applyFilters();
+    };
     rf.append(p);
   });
 })();
@@ -400,6 +439,8 @@ function applyFilters(){
   DATA.nodes.forEach(n=>{const v=visible(n);n._c.style.display=v?"":"none";n._lab.style.display="none";});
   DATA.edges.forEach(e=>{e._ln.style.display=edgeVisible(e)?"":"none";});
   if(selected&&visible(selected))highlight(selected);else clearHi();
+  renderHighlights();                       // filters also drive the bridges/debates pane
+  if(curView==="tree") renderTree();         // …and the taxonomy tree
 }
 function syncRelPills(){document.querySelectorAll('#relFilter .pill').forEach(p=>p.classList.toggle('off',!activeRels.has(p.dataset.rel)));}
 function syncCivPills(){document.querySelectorAll('#civFilter .pill').forEach(p=>p.classList.toggle('off',!activeCivs.has(p.dataset.civ)));}
@@ -483,25 +524,52 @@ function renderPanel(n){
 
 /* ---------------- highlights ---------------- */
 function flagPill(civ){const p=el("span",{class:"cc"},civ);p.style.borderColor=DATA.civColors[civ];p.style.color=DATA.civColors[civ];return p;}
-(function(){
-  const bx=$("#bridges");
+function quoteBlock(id){                     // dual-language quotation + a voice button per language
+  const n=nodeById.get(id);
+  const orig=n.speak.idea.text, olang=n.speak.idea.lang;
+  const eng = n.quote ? n.quote.e : n.text;
+  const w=el("div",{class:"qblock"});
+  w.append(el("div",{class:"qname"}, withYear(n)+" · "+n.civ));
+  const line=el("div",{class:"qline"});
+  line.append(el("span",{class:"qo2"}, orig), el("span",{class:"qe2"}, "“"+eng+"”"));
+  const btns=el("div",{class:"qbtns"});
+  const bo=el("button",{class:"speakmini",title:"pronounce the original — "+langName(olang)}, "🔊 "+langName(olang));
+  bo.onclick=ev=>{ev.stopPropagation(); speak(n.speak.idea);};
+  const be=el("button",{class:"speakmini",title:"pronounce the English translation"}, "🔊 English");
+  be.onclick=ev=>{ev.stopPropagation(); speak({text:eng, lang:"en-US"});};
+  btns.append(bo, be);
+  w.append(line, btns);
+  return w;
+}
+function hlPass(a,b,ca,cb,relType){        // honour the Civilizations / Relations filters + search
+  if(!activeRels.has(relType)) return false;
+  if(!(activeCivs.has(ca)||activeCivs.has(cb))) return false;
+  if(searchHit && !(searchHit.has(a)||searchHit.has(b))) return false;
+  return true;
+}
+function renderHighlights(){
+  const bx=$("#bridges"); bx.innerHTML=""; let nb=0;
   DATA.highlights.bridges.forEach(br=>{
+    if(!hlPass(br.a,br.b,br.ca,br.cb,"equivalence")) return;
     const d=el("div",{class:"bridge"});
     const who=el("div",{class:"who"});
     who.append(flagPill(br.ca),el("b",{},withYear(nodeById.get(br.a))),el("span",{style:"color:var(--eq);font-weight:700"},"  =  "),el("b",{},withYear(nodeById.get(br.b))),flagPill(br.cb),el("span",{class:"th"},br.theme));
-    d.append(who,el("div",{class:"ex"},"“"+br.xa+"”  ·  “"+br.xb+"”"));
-    d.onclick=()=>focusPair(br.a,br.b); bx.append(d);
+    d.append(who, quoteBlock(br.a), quoteBlock(br.b));
+    d.onclick=()=>focusPair(br.a,br.b); bx.append(d); nb++;
   });
-  const dx=$("#debates");
+  if(!nb) bx.append(el("div",{class:"hlnone"},"— none match the current filter —"));
+  const dx=$("#debates"); dx.innerHTML=""; let nd=0;
   DATA.highlights.debates.forEach(db=>{
+    if(!hlPass(db.a,db.b,db.ca,db.cb,"contradiction")) return;
     const d=el("div",{class:"bridge deb"});
     const who=el("div",{class:"who"});
     const vs=el("span",{style:"color:var(--con);font-weight:700"},"  ✕  ");
     who.append(flagPill(db.ca),el("b",{},withYear(nodeById.get(db.a))),vs,el("b",{},withYear(nodeById.get(db.b))),flagPill(db.cb),el("span",{class:"th"},db.theme));
-    d.append(who,el("div",{class:"ex"},"“"+db.xa+"”  vs  “"+db.xb+"”"));
-    d.onclick=()=>focusPair(db.a,db.b); dx.append(d);
+    d.append(who, quoteBlock(db.a), quoteBlock(db.b));
+    d.onclick=()=>focusPair(db.a,db.b); dx.append(d); nd++;
   });
-})();
+  if(!nd) dx.append(el("div",{class:"hlnone"},"— none match the current filter —"));
+}
 function focusPair(aid,bid){ if(curView!=="graph")setView("graph");
   $("#search").value="";searchHit=null;$("#matchcount").textContent="";
   const a=nodeById.get(aid);activeCivs.add(a.civ);activeCivs.add(nodeById.get(bid).civ);
@@ -533,15 +601,16 @@ function renderTree(){
         dot.style.cssText=`width:10px;height:10px;border-radius:50%;background:${n.color};flex:0 0 auto`;
         const name=el("a",{class:"en",href:n.source_url,target:"_blank",rel:"noopener",title:"open the original text"},n.label);
         name.onclick=ev=>ev.stopPropagation();
-        h.append(dot,name,n.year?el("span",{class:"eyear"},"("+n.year+")"):document.createTextNode(""),el("span",{class:"enat"},n.native));
+        h.append(dot,name,n.year?el("span",{class:"eyear"},"("+n.year+")"):document.createTextNode(""),
+          el("span",{class:"enat"},n.native), iconSpeak(n.speak.name));   // name voice button, next to the native name
         c.append(h,el("div",{class:"etext"},n.text));
-        if(n.quote){const q=el("a",{class:"equote",href:n.source_url,target:"_blank",rel:"noopener"});
-          q.append(el("span",{class:"qo"},n.quote.o),el("span",{class:"qe"},"“"+n.quote.e+"”"));
-          q.onclick=ev=>ev.stopPropagation();c.append(q);}
+        const q=el("div",{class:"equote"});                              // idea/quote line + its voice button
+        q.append(el("span",{class:"qo"},n.speak.idea.text));
+        if(n.quote) q.append(el("span",{class:"qe"},"“"+n.quote.e+"”"));
+        q.append(iconSpeak(n.speak.idea));
+        c.append(q);
         const src=el("a",{class:"cardsrc",href:n.source_url,target:"_blank",rel:"noopener"},"read in context");
         src.onclick=ev=>ev.stopPropagation();c.append(src);
-        const sp=el("div",{class:"speakpair"});
-        sp.append(speakBtn("name",n.speak.name),speakBtn("idea",n.speak.idea));c.append(sp);
         c.onclick=()=>select(n); grid.append(c);});
       sd.append(grid);d.append(sd);
     });
@@ -579,7 +648,7 @@ $("#relax").onclick=()=>{
 $("#reset").onclick=()=>{DATA.nodes.forEach(n=>{n.x=n.x0;n.y=n.y0;updateNode(n);});resetAllFilters();};
 
 /* ---------------- go ---------------- */
-fitView(); showHubLabels(); renderTree();
+fitView(); showHubLabels(); renderTree(); renderHighlights();
 window.addEventListener("resize",()=>{if(curView==="graph")fitView();});
 </script>
 </body>
