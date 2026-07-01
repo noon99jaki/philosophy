@@ -260,6 +260,7 @@ let activeRels = new Set(Object.keys(DATA.relTypes));
 let selected = null;
 let selectedTheme = null;
 function withYear(n){return n && n.year ? `${n.label} (${n.year})` : (n ? n.label : "");}
+function nodeLabel(n){let s=(n.speak&&n.speak.idea&&n.speak.idea.en)||n.label; return s.length>28?s.slice(0,27)+"…":s;}
 
 /* ---------------- speech: pronounce a concept in its original language ---------------- */
 let _voices = [];
@@ -377,7 +378,7 @@ DATA.nodes.forEach(n=>{
   c.style.fill=n.color; c.style.stroke="#0c1116"; c.style.strokeWidth=1.4; c.style.cursor="pointer";
   n._c=c; n._r=r; gNodes.append(c);
   const lab=svgEl("text",{x:n.x,y:n.y-r-4,"text-anchor":"middle"});
-  lab.setAttribute("class","nodelabel"); lab.textContent=withYear(n); lab.style.display="none";
+  lab.setAttribute("class","nodelabel"); lab.textContent=nodeLabel(n); lab.style.display="none";
   n._lab=lab; gLabels.append(lab);
   c.addEventListener("mouseenter",ev=>hover(n,ev));
   c.addEventListener("mousemove",ev=>moveTip(ev));
@@ -423,6 +424,7 @@ function redraw(){
     n._c.setAttribute("cx",p[0]);n._c.setAttribute("cy",p[1]);
     n._lab.setAttribute("x",p[0]);n._lab.setAttribute("y",p[1]-n._r-6);}
   renderThemeLayer();
+  if(!selected&&!selectedTheme)showHubLabels();   // reveal idea labels as you zoom in
 }
 function fitView(){
   const xs=DATA.nodes.map(n=>n.x),ys=DATA.nodes.map(n=>n.y);
@@ -432,7 +434,8 @@ function fitView(){
   view.k=Math.min(k,1.4);
   view.x=w/2-view.k*(minx+maxx)/2; view.y=h/2-view.k*(miny+maxy)/2; redraw();
 }
-function showHubLabels(){DATA.nodes.forEach(n=>{n._lab.style.display=(visible(n)&&n.degree>=10)?"":"none";});}
+function showHubLabels(){const k=view.k;DATA.nodes.forEach(n=>{
+  n._lab.style.display=(visible(n)&&(k>=1.5||(n.degree>=10&&k>=0.9)))?"":"none";});}
 
 /* ---------------- interactions ---------------- */
 const tip=$("#tip");
@@ -577,7 +580,7 @@ function renderPanel(n){
 function highlightTheme(th){
   const keep=new Set(); th.stances.forEach(s=>s.ids.forEach(id=>keep.add(id)));
   DATA.nodes.forEach(m=>{const vis=visible(m);m._c.style.opacity=vis?(keep.has(m.id)?1:.1):0;
-    m._lab.style.display=(vis&&keep.has(m.id)&&m.degree>=9)?"":"none";});
+    m._lab.style.display=(vis&&keep.has(m.id))?"":"none";});
   DATA.edges.forEach(e=>{const on=keep.has(e.s)&&keep.has(e.t)&&edgeVisible(e);
     e._ln.style.opacity=on?.85:(edgeVisible(e)?.04:0);});
 }
