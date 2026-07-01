@@ -1,0 +1,122 @@
+"""
+Stage 2 — Break all text into sentence-level elements, in a uniform format.
+
+  * Segments every downloaded source into clean prose sentences  -> data/sentences.json
+  * Emits the curated atomic concept/rule elements                -> data/elements.json
+    (each enriched with civ / school / native name / link to the original text, and
+     with real supporting sentences pulled from the downloaded corpus as "evidence").
+"""
+import os
+import json
+
+from util import url_to_id, sentence_split, good_sentence, clean_corpus_text
+from knowledge import THEMES, THINKER, ELEMENTS, QUOTES
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+DATA = os.path.join(ROOT, "data")
+RAW = os.path.join(DATA, "raw")
+
+MAX_SENTENCES_PER_SOURCE = 400
+STOP = set("the a an and or of to in is are be that this with for as it its by on "
+           "from at which not but his her their they them he she we you your our all "
+           "one two who what when how than then so if no nor can may will shall into "
+           "do does did done has have had been being more most such only own same".split())
+
+
+def load_text(url):
+    path = os.path.join(RAW, url_to_id(url) + ".txt")
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            return f.read()
+    return ""
+
+
+def kw_tokens(el):
+    toks = set(w for w in el["keywords"].lower().split() if len(w) > 3 and w not in STOP)
+    # add salient words from the element text itself
+    for w in el["text"].lower().replace(",", " ").replace(".", " ").split():
+        w = w.strip("();:'\"")
+        if len(w) > 4 and w not in STOP:
+            toks.add(w)
+    return toks
+
+
+def main():
+    # ---- 1. sentence-level segmentation of the whole corpus ----------------
+    sentences = {}          # url_id -> [sentences]
+    sent_index = {}         # url_id -> list of (lower_sentence, original)
+    total = 0
+    for fn in sorted(os.listdir(RAW)):
+        if not fn.endswith(".txt"):
+            continue
+        uid = fn[:-4]
+        with open(os.path.join(RAW, fn), encoding="utf-8") as f:
+            text = clean_corpus_text(f.read())
+        good = [s for s in sentence_split(text) if good_sentence(s)]
+        good = good[:MAX_SENTENCES_PER_SOURCE]
+        if good:
+            sentences[uid] = good
+            sent_index[uid] = [(s.lower(), s) for s in good]
+            total += len(good)
+    with open(os.path.join(DATA, "sentences.json"), "w", encoding="utf-8") as f:
+        json.dump(sentences, f, ensure_ascii=False, indent=1)
+    print(f"Segmented corpus: {total:,} clean prose sentences from {len(sentences)} sources")
+
+    # ---- 2. build the uniform element store --------------------------------
+    out = []
+    evidence_hits = 0
+    for el in ELEMENTS:
+        native, civ, school, source = THINKER[el["thinker"]]
+        toks = kw_tokens(el)
+
+        # find supporting sentences in this thinker's downloaded original text
+        evidence = []
+        uid = url_to_id(source)
+        for low, orig in sent_index.get(uid, []):
+            hits = sum(1 for t in toks if t in low)
+            if hits >= 2:
+                evidence.append((hits, orig))
+        evidence.sort(key=lambda x: (-x[0], len(x[1])))
+        evidence = [{"text": o, "source_url": source} for _, o in evidence[:2]]
+        if evidence:
+            evidence_hits += 1
+
+        out.append({
+            "id": el["id"],
+            "text": el["text"],
+            "type": el["type"],
+            "theme": el["theme"],
+            "theme_label": THEMES[el["theme"]][0],
+            "stance": el["stance"],
+            "thinker": el["thinker"],
+            "thinker_native": native,
+            "civ": civ,
+            "school": school,
+            "source_url": source,
+            "keywords": sorted(toks),
+            "quote": ({"o": QUOTES[el["id"]][0], "e": QUOTES[el["id"]][1]}
+                      if el["id"] in QUOTES else None),
+            "evidence": evidence,
+        })
+
+    # integrity checks
+    ids = [e["id"] for e in out]
+    assert len(ids) == len(set(ids)), "duplicate element ids!"
+    for e in out:
+        assert e["theme"] in THEMES, e["theme"]
+
+    with open(os.path.join(DATA, "elements.json"), "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=2)
+
+    civs = {}
+    for e in out:
+        civs[e["civ"]] = civs.get(e["civ"], 0) + 1
+    print(f"Elements: {len(out)}  across {len(civs)} civilizations")
+    print("  " + "  ".join(f"{c}:{n}" for c, n in sorted(civs.items(), key=lambda x: -x[1])))
+    print(f"Elements with textual evidence pulled from originals: {evidence_hits}/{len(out)}")
+    print("Wrote data/sentences.json, data/elements.json")
+
+
+if __name__ == "__main__":
+    main()

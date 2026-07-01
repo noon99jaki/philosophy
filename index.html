@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Philosophies of Humankind before 300 BCE — A Tree of Civilizations</title>
+<style>
+  :root{
+    --bg:#0e1318; --bg2:#131a22; --card:#1a212c; --card2:#202836;
+    --ink:#ece6d8; --muted:#9aa6b2; --faint:#6b7682;
+    --line:#3a4654; --gold:#e3b341; --gold2:#f2cd6b;
+    --mes:#c9a24b; --egy:#2fb8a8; --heb:#6c8bd5; --per:#dd6a3f;
+    --ind:#e8902e; --chn:#d8443f; --grc:#9b87d4;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(227,179,65,.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 10%, rgba(155,135,212,.08), transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Hoefler Text",Georgia,"Times New Roman",serif;
+    line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 80px}
+
+  header.page{
+    text-align:center;padding:34px 20px 26px;margin-bottom:10px;
+    border:1px solid var(--line);border-radius:18px;
+    background:linear-gradient(180deg,rgba(227,179,65,.07),rgba(255,255,255,.01));
+    position:relative;overflow:hidden;
+  }
+  header.page::before{
+    content:"";position:absolute;inset:0;
+    background-image:radial-gradient(circle at 50% 0,rgba(227,179,65,.10),transparent 70%);
+    pointer-events:none;
+  }
+  h1.title{margin:0 0 6px;font-size:clamp(26px,4.4vw,44px);letter-spacing:.5px;
+    background:linear-gradient(90deg,var(--gold2),#fff7e6 40%,var(--gold));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .subtitle{color:var(--muted);font-size:clamp(14px,2vw,18px);font-style:italic;margin:0 auto;max-width:760px}
+  .epigraph{margin:16px auto 0;max-width:720px;color:var(--faint);font-size:13.5px}
+
+  .intro{margin:22px 2px 6px;color:#cfd6dd;font-size:15.5px}
+  .intro p{margin:10px 0}
+  .axial{
+    margin:18px 0;padding:14px 18px;border-left:3px solid var(--gold);
+    background:rgba(227,179,65,.06);border-radius:0 12px 12px 0;font-size:14.5px;color:#d8dde2;
+  }
+
+  /* Legend */
+  .legend{display:flex;flex-wrap:wrap;gap:10px 14px;margin:18px 0 4px;font-size:13px;color:var(--muted)}
+  .legend .chip{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border:1px solid var(--line);
+    border-radius:999px;background:var(--card)}
+  .swatch{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .nb{font-size:12.5px;color:var(--faint);margin:10px 2px 0}
+
+  /* Controls */
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:22px 0 8px;
+    position:sticky;top:0;z-index:20;padding:12px;border-radius:14px;
+    background:rgba(14,19,24,.86);backdrop-filter:blur(8px);border:1px solid var(--line)}
+  .controls input[type=search]{
+    flex:1 1 240px;min-width:180px;padding:9px 13px;border-radius:10px;border:1px solid var(--line);
+    background:var(--bg2);color:var(--ink);font-size:14px;font-family:inherit}
+  .controls input::placeholder{color:var(--faint)}
+  .btn{padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card2);
+    color:var(--ink);font:inherit;font-size:13.5px;cursor:pointer;transition:.15s}
+  .btn:hover{border-color:var(--gold);color:var(--gold2)}
+  .count{font-size:12.5px;color:var(--faint);margin-left:auto;white-space:nowrap}
+
+  /* ---- Tree ---- */
+  ul.tree,ul.tree ul{list-style:none;margin:0;padding:0}
+  ul.tree{margin-top:14px}
+  .tree li{position:relative;padding:5px 0 5px 26px}
+  .tree li::before{content:"";position:absolute;left:8px;top:0;bottom:0;border-left:2px solid var(--line)}
+  .tree li::after{content:"";position:absolute;left:8px;top:20px;width:16px;border-top:2px solid var(--line)}
+  .tree li:last-child::before{height:20px}
+  /* root + civ list have their own line color via accent on the civ <li> */
+  .tree > li{padding-left:0}
+  .tree > li::before,.tree > li::after{display:none}
+
+  .node{display:inline-block;vertical-align:top}
+  .root-node{
+    display:inline-block;padding:12px 20px;border:1px solid var(--gold);border-radius:14px;
+    background:linear-gradient(180deg,rgba(227,179,65,.14),rgba(227,179,65,.04));
+    font-size:18px;letter-spacing:.4px;color:var(--gold2);font-weight:600;margin-bottom:6px
+  }
+
+  /* Civilization branch */
+  li.civ{padding-left:26px}
+  li.civ::before{border-color:var(--cc,var(--line))}
+  li.civ::after{border-color:var(--cc,var(--line))}
+  details.civ-d{margin:0}
+  summary.civ-h{
+    list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:12px 16px;border:1px solid var(--line);border-left:5px solid var(--cc,var(--gold));
+    border-radius:12px;background:linear-gradient(180deg,var(--card),var(--bg2));
+    transition:.15s;
+  }
+  summary.civ-h:hover{border-color:var(--cc,var(--gold));box-shadow:0 0 0 1px var(--cc,var(--gold)) inset}
+  summary.civ-h::-webkit-details-marker{display:none}
+  .civ-h .tw{font-size:13px;color:var(--cc,var(--gold));transition:transform .18s;display:inline-block;width:12px}
+  details.civ-d[open] > summary .tw{transform:rotate(90deg)}
+  .civ-h .cname{font-size:20px;font-weight:600;color:var(--ink)}
+  .civ-h .cnative{font-size:16px;color:var(--cc)}
+  .civ-h .cera{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 10px;margin-left:4px}
+  .civ-h .cflag{font-size:22px;filter:saturate(.9)}
+  .civ-tag{font-size:12.5px;color:var(--muted);font-style:italic;flex-basis:100%;margin-top:2px}
+
+  /* School node */
+  .school-h{
+    display:inline-flex;align-items:baseline;gap:9px;flex-wrap:wrap;
+    padding:6px 13px;border-radius:9px;background:var(--card2);border:1px solid var(--line);
+  }
+  .school-h .sname{font-weight:600;color:var(--gold2);font-size:15.5px}
+  .school-h .snative{color:var(--muted);font-size:14px}
+  .school-h .sdesc{color:var(--faint);font-size:12.5px;font-style:italic;width:100%}
+
+  /* Thinker entry */
+  li.entry > .person{
+    display:block;padding:9px 14px;border-radius:10px;background:var(--card);
+    border:1px solid var(--line);transition:.15s
+  }
+  li.entry > .person:hover{border-color:var(--cc,var(--gold))}
+  .person .pl{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .pname{font-size:16px;font-weight:600;color:var(--ink)}
+  .pnative{font-size:15.5px;color:var(--cc,var(--gold2))}
+  .proman{font-size:13px;color:var(--muted);font-style:italic}
+  .pdates{font-size:12.5px;color:var(--faint);margin-left:2px;white-space:nowrap}
+  .pdesc{font-size:13.5px;color:#c3cbd3;margin:5px 0 2px}
+  .badge{font-size:11px;letter-spacing:.4px;text-transform:uppercase;padding:2px 8px;border-radius:999px;
+    border:1px solid var(--cc,var(--line));color:var(--cc,var(--gold));background:rgba(255,255,255,.02)}
+  .badge.boundary{border-color:#caa15a;color:#e6c98a;background:rgba(227,179,65,.07)}
+
+  /* Works list */
+  ul.works{margin:7px 0 1px;padding-left:2px;list-style:none}
+  ul.works li{position:static;padding:3px 0}
+  ul.works li::before,ul.works li::after{display:none}
+  .work{display:inline-flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+  .wtitle{color:var(--ink);font-size:14px}
+  .wnative{color:var(--muted);font-size:13.5px}
+  a.src{color:var(--gold);text-decoration:none;border-bottom:1px dotted rgba(227,179,65,.5);font-size:12.5px;white-space:nowrap}
+  a.src::before{content:"📜 ";filter:grayscale(.1)}
+  a.src:hover{color:var(--gold2);border-bottom-style:solid}
+  a.src.alt{color:var(--muted);border-bottom-color:rgba(154,166,178,.4)}
+  a.src.alt::before{content:"↗ "}
+  a.src.alt:hover{color:var(--ink)}
+  .wnote{color:var(--faint);font-size:12px;font-style:italic}
+
+  rt{font-size:9px;color:var(--muted)}
+  .rtl{direction:rtl;unicode-bidi:isolate}
+
+  footer.page{margin-top:42px;padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--card);font-size:13.5px;color:var(--muted)}
+  footer.page h3{color:var(--gold2);margin:0 0 10px;font-size:16px}
+  footer.page a{color:var(--gold);text-decoration:none;border-bottom:1px dotted rgba(227,179,65,.45)}
+  footer.page a:hover{color:var(--gold2)}
+  footer .srcgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px 22px;margin:8px 0}
+  .disclaim{margin-top:14px;color:var(--faint);font-size:12px}
+  .hl{background:rgba(227,179,65,.28);color:#fff;border-radius:3px}
+  mark{background:rgba(227,179,65,.30);color:#fff;padding:0 2px;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <h1 class="title">Philosophies of Humankind, before 300&nbsp;BCE</h1>
+    <p class="subtitle">A branching tree of the world's earliest wisdom &mdash; cosmology, ethics, metaphysics and law &mdash; across seven civilizations, with each thinker's major writings and links to the original texts online.</p>
+    <p class="epigraph">&ldquo;The owl of Minerva spreads its wings only with the falling of the dusk.&rdquo; &mdash; and yet here, at the dawn, humankind first asked: <em>What is real? How should I live? What is just?</em></p>
+  </header>
+
+  <section class="intro">
+    <p>This tree gathers the <strong>major philosophical traditions that arose before 300&nbsp;BCE</strong>. &ldquo;Philosophy&rdquo; is taken broadly &mdash; not only the systematic argument of the Greeks, but the wisdom literature, cosmologies, ethical and legal reflection, and metaphysical insight that earlier and contemporary civilizations produced. Each entry gives the thinker or text in <strong>English and in its own language/script</strong> (with romanization), approximate dates, and a <span style="color:var(--gold)">📜 link to an online edition of the original text</span> wherever one survives.</p>
+
+    <div class="axial">
+      <strong>The Axial Age.</strong> The philosopher Karl Jaspers named the centuries <strong>c.&nbsp;800&ndash;300&nbsp;BCE</strong> the &ldquo;<em>Achsenzeit</em>&rdquo; (Axial Age): in this window, and seemingly independently, <em>China, India, Persia, Israel and Greece</em> each gave birth to enduring philosophies and religions. Older still are the wisdom traditions of <em>Mesopotamia and Egypt</em>, whose reflections on justice, mortality and cosmic order (Ma&rsquo;at) form the deep root of this tree.
+    </div>
+  </section>
+
+  <div class="legend" aria-label="Legend">
+    <span class="chip"><span class="swatch" style="background:var(--mes)"></span>Mesopotamia</span>
+    <span class="chip"><span class="swatch" style="background:var(--egy)"></span>Egypt</span>
+    <span class="chip"><span class="swatch" style="background:var(--heb)"></span>Israel / Hebrew</span>
+    <span class="chip"><span class="swatch" style="background:var(--per)"></span>Persia</span>
+    <span class="chip"><span class="swatch" style="background:var(--ind)"></span>India</span>
+    <span class="chip"><span class="swatch" style="background:var(--chn)"></span>China</span>
+    <span class="chip"><span class="swatch" style="background:var(--grc)"></span>Greece</span>
+    <span class="chip">📜 original text · ↗ alternate source · <span class="badge boundary" style="margin-left:4px">~300</span> straddles the boundary</span>
+  </div>
+  <p class="nb">Dates are approximate and, for the most ancient figures, traditional or scholarly reconstructions. Names of works lost in the original (e.g. those of Socrates or the early atomists) link to the ancient sources that preserve their fragments.</p>
+
+  <div class="controls">
+    <span class="tw" style="display:none"></span>
+    <input type="search" id="filter" placeholder="🔎 Filter by name, school, work, or language (e.g. &lsquo;atoms&rsquo;, &lsquo;Confucius&rsquo;, &lsquo;Upanishad&rsquo;)&hellip;" autocomplete="off">
+    <button class="btn" id="expandAll">Expand all</button>
+    <button class="btn" id="collapseAll">Collapse all</button>
+    <span class="count" id="count"></span>
+  </div>
+
+  <ul class="tree" id="tree">
+    <li>
+      <span class="root-node">🌍 Philosophies of Humankind &mdash; before 300&nbsp;BCE</span>
+      <ul>
+
+        <!-- ===================== MESOPOTAMIA ===================== -->
+        <li class="civ" style="--cc:var(--mes)">
+          <details class="civ-d" open>
+            <summary class="civ-h">
+              <span class="tw">▶</span><span class="cflag">𒀭</span>
+              <span class="cname">Mesopotamia</span>
+              <span class="cnative">Sumer · Akkad · Babylon</span>
+              <span class="cera">c. 2600 &ndash; 500 BCE</span>
+              <span class="civ-tag">The first writing, the first laws, the first poems on death and justice &mdash; proto-philosophy in cuneiform.</span>
+            </summary>
+            <ul>
+              <li>
+                <span class="school-h"><span class="sname">Sumerian &amp; Akkadian Wisdom</span>
+                  <span class="snative">𒅗𒅗 nam-ku<sub>3</sub>-zu</span>
+                  <span class="sdesc">Instruction, proverb and lament &mdash; reflection on fate, conduct and the gods.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Instructions of Shuruppak</span>
+                      <span class="pnative">𒋗𒆳𒆠 šuruppak</span>
+                      <span class="pdates">c. 2600&ndash;2500 BCE</span></div>
+                    <div class="pdesc">Among the oldest literary texts on Earth: a father&rsquo;s practical &amp; ethical maxims to his son, anticipating later wisdom books by millennia.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Sumerian instruction poem</span>
+                      <a class="src" href="https://etcsl.orinst.ox.ac.uk/section5/tr561.htm" target="_blank" rel="noopener">ETCSL (Sumerian + English)</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">The Epic of Gilgamesh</span>
+                      <span class="pnative">𒄑𒂅𒈠 / <span class="proman">Sha naqba īmuru</span></span>
+                      <span class="pdates">c. 2100&ndash;1200 BCE</span></div>
+                    <div class="pdesc">Humankind&rsquo;s first meditation on mortality, friendship and the limits of glory: a king seeks eternal life and learns to accept death.</div>
+                    <ul class="works">
+                      <li><span class="work"><span class="wtitle">Standard Babylonian Epic</span>
+                        <a class="src" href="https://sacred-texts.com/ane/eog/index.htm" target="_blank" rel="noopener">Internet Sacred Text Archive</a>
+                        <a class="src alt" href="http://www.ancienttexts.org/library/mesopotamian/gilgamesh/" target="_blank" rel="noopener">ancienttexts.org</a></span></li>
+                    </ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Babylonian wisdom dialogues</span>
+                      <span class="pnative"><span class="proman">Ludlul bēl nēmeqi · Babylonian Theodicy · Dialogue of Pessimism</span></span>
+                      <span class="pdates">c. 1500&ndash;1000 BCE</span></div>
+                    <div class="pdesc">The problem of undeserved suffering and the silence of the gods &mdash; a Mesopotamian &ldquo;Job&rdquo; and a startling dialogue on the futility of every plan.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Akkadian wisdom texts</span>
+                      <a class="src" href="https://sacred-texts.com/ane/index.htm" target="_blank" rel="noopener">Sacred Texts: Ancient Near East</a>
+                      <span class="wnote">translations of Lambert&rsquo;s <em>Babylonian Wisdom Literature</em></span></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+              <li>
+                <span class="school-h"><span class="sname">Law &amp; Cosmic Order</span>
+                  <span class="sdesc">Justice (Sumerian <em>níg-si-sá</em>) as a divine mandate held by the king.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">The Code of Hammurabi</span>
+                      <span class="pnative">𒄩𒄠𒈬𒊏𒁉 <span class="proman">Ḫammurabi</span></span>
+                      <span class="pdates">c. 1754 BCE</span></div>
+                    <div class="pdesc">One of the earliest written legal philosophies &mdash; ~282 laws &ldquo;that the strong might not oppress the weak,&rdquo; framing justice as cosmic order.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Law-code stele</span>
+                      <a class="src" href="https://avalon.law.yale.edu/ancient/hamframe.asp" target="_blank" rel="noopener">Yale Avalon Project</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Enūma Eliš (Creation Epic)</span>
+                      <span class="pnative">𒂊𒉡𒈠𒂊𒇺 <span class="proman">Enūma Eliš</span></span>
+                      <span class="pdates">c. 1200&ndash;1100 BCE</span></div>
+                    <div class="pdesc">A cosmogony: order (Marduk) wrought out of primordial chaos (Tiamat) &mdash; the world and humankind given purpose and rank.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Babylonian creation myth</span>
+                      <a class="src" href="https://sacred-texts.com/ane/enuma.htm" target="_blank" rel="noopener">Internet Sacred Text Archive</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+        <!-- ===================== EGYPT ===================== -->
+        <li class="civ" style="--cc:var(--egy)">
+          <details class="civ-d" open>
+            <summary class="civ-h">
+              <span class="tw">▶</span><span class="cflag">𓂀</span>
+              <span class="cname">Ancient Egypt</span>
+              <span class="cnative">Kemet · 𓆎𓅓𓏏𓊖</span>
+              <span class="cera">c. 2400 &ndash; 1100 BCE</span>
+              <span class="civ-tag">The <em>Sebayt</em> (&ldquo;Teachings&rdquo;) and the ideal of <em>Ma&rsquo;at</em> &mdash; truth, balance and cosmic justice.</span>
+            </summary>
+            <ul>
+              <li>
+                <span class="school-h"><span class="sname">Ma&rsquo;at &amp; the Teachings (Sebayt)</span>
+                  <span class="snative">𓐙𓏏𓆄 mꜣꜥt</span>
+                  <span class="sdesc">Ethics as alignment with Ma&rsquo;at: truth, order, reciprocity &mdash; weighed against the heart after death.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Ptahhotep</span>
+                      <span class="pnative">𓊪𓏏𓎛𓊪 <span class="proman">Ptḥ-ḥtp</span></span>
+                      <span class="pdates">vizier, c. 2400 BCE</span></div>
+                    <div class="pdesc">The <em>Maxims of Ptahhotep</em> &mdash; perhaps the world&rsquo;s oldest book of moral philosophy: 37 instructions on humility, justice, speech and self-control.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">The Instruction of Ptah-hotep</span>
+                      <a class="src" href="https://www.gutenberg.org/files/30508/30508-h/30508-h.htm" target="_blank" rel="noopener">Project Gutenberg (Gunn tr.)</a>
+                      <a class="src alt" href="https://sacred-texts.com/egy/woe/woe05.htm" target="_blank" rel="noopener">Sacred Texts</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Instruction of Amenemope</span>
+                      <span class="pnative"><span class="proman">jmn-m-jpt</span></span>
+                      <span class="pdates">c. 1300&ndash;1100 BCE</span></div>
+                    <div class="pdesc">Thirty chapters on the &ldquo;silent, contented man,&rdquo; honesty and contentment &mdash; closely parallel to the Biblical Book of Proverbs.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Wisdom of Amenemope</span>
+                      <a class="src" href="https://sacred-texts.com/egy/index.htm" target="_blank" rel="noopener">Sacred Texts: Egypt</a>
+                      <span class="wnote">in collections of Egyptian wisdom</span></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Dispute between a Man &amp; his Ba</span>
+                      <span class="pnative"><span class="proman">Papyrus Berlin 3024</span></span>
+                      <span class="pdates">c. 1900 BCE</span></div>
+                    <div class="pdesc">A man debates his own soul about whether life&rsquo;s suffering makes death desirable &mdash; a strikingly existential dialogue.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">&ldquo;Dispute of a man with his soul&rdquo;</span>
+                      <a class="src alt" href="https://sacred-texts.com/egy/index.htm" target="_blank" rel="noopener">Sacred Texts: Egypt</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">The Great Hymn to the Aten</span>
+                      <span class="pnative"><span class="proman">attr. Akhenaten</span></span>
+                      <span class="pdates">c. 1350 BCE</span></div>
+                    <div class="pdesc">A radical, near-monotheistic hymn to the sun-disc as sole creator &mdash; often compared with Psalm 104.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Great Hymn to the Aten</span>
+                      <a class="src" href="https://www.historyskills.com/classroom/ancient-history/hymn-to-the-aten/" target="_blank" rel="noopener">full translation</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Book of the Dead</span>
+                      <span class="pnative">𓂋𓏤𓈒𓂧 <span class="proman">rꜣ nw prt m hrw</span></span>
+                      <span class="pdates">New Kingdom, c. 1550 BCE&ndash;</span></div>
+                    <div class="pdesc">&ldquo;Spells of Coming Forth by Day&rdquo; &mdash; including the weighing of the heart against the feather of Ma&rsquo;at, an early articulation of moral judgment.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Papyrus of Ani</span>
+                      <a class="src" href="https://sacred-texts.com/egy/ebod/index.htm" target="_blank" rel="noopener">Sacred Texts (Budge tr.)</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+        <!-- ===================== HEBREW / ISRAEL ===================== -->
+        <li class="civ" style="--cc:var(--heb)">
+          <details class="civ-d" open>
+            <summary class="civ-h">
+              <span class="tw">▶</span><span class="cflag">✡︎</span>
+              <span class="cname">Israel / Hebrew</span>
+              <span class="cnative rtl">עִבְרִית</span>
+              <span class="cera">c. 900 &ndash; 300 BCE</span>
+              <span class="civ-tag">Ethical monotheism, prophetic justice, and the wisdom of Proverbs, Job &amp; Qohelet.</span>
+            </summary>
+            <ul>
+              <li>
+                <span class="school-h"><span class="sname">Wisdom Literature</span>
+                  <span class="snative rtl">חָכְמָה <span class="proman">Ḥokhmah</span></span>
+                  <span class="sdesc">The fear of the LORD, the limits of human understanding, and the search for meaning &ldquo;under the sun.&rdquo;</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Proverbs</span>
+                      <span class="pnative rtl">מִשְׁלֵי</span><span class="proman">Mishlei</span>
+                      <span class="pdates">compiled c. 7th&ndash;5th c. BCE</span></div>
+                    <div class="pdesc">Practical and theological wisdom; personified Wisdom (<em>Ḥokhmah</em>) as the first of God&rsquo;s works.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Sefer Mishlei</span>
+                      <a class="src" href="https://www.sefaria.org/Proverbs" target="_blank" rel="noopener">Sefaria (Hebrew + English)</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Ecclesiastes (Qoheleth)</span>
+                      <span class="pnative rtl">קֹהֶלֶת</span><span class="proman">Qohelet</span>
+                      <span class="pdates">c. 450&ndash;200 BCE</span></div>
+                    <div class="pdesc">&ldquo;Vanity of vanities&rdquo; &mdash; a profound, skeptical meditation on mortality, time and the meaning of toil.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Sefer Qohelet</span>
+                      <a class="src" href="https://www.sefaria.org/Ecclesiastes" target="_blank" rel="noopener">Sefaria (Hebrew + English)</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Job</span>
+                      <span class="pnative rtl">אִיּוֹב</span><span class="proman">Iyyov</span>
+                      <span class="pdates">c. 6th&ndash;4th c. BCE</span></div>
+                    <div class="pdesc">The drama of the righteous sufferer; the problem of theodicy answered from the whirlwind.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Sefer Iyyov</span>
+                      <a class="src" href="https://www.sefaria.org/Job" target="_blank" rel="noopener">Sefaria (Hebrew + English)</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+              <li>
+                <span class="school-h"><span class="sname">Torah &amp; the Prophets</span>
+                  <span class="snative rtl">תּוֹרָה · נְבִיאִים</span>
+                  <span class="sdesc">Covenant, law and the prophetic demand for justice and mercy over ritual.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">The Torah</span>
+                      <span class="pnative rtl">תּוֹרָה</span><span class="proman">Torah</span>
+                      <span class="pdates">redacted c. 6th&ndash;5th c. BCE</span></div>
+                    <div class="pdesc">The Five Books &mdash; creation, covenant and the moral law (the Decalogue) at the root of Western ethics.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Chamishah Chumshei Torah</span>
+                      <a class="src" href="https://www.sefaria.org/Genesis" target="_blank" rel="noopener">Sefaria · Genesis</a>
+                      <a class="src alt" href="https://www.sefaria.org/texts/Tanakh" target="_blank" rel="noopener">full Tanakh</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">The Prophets (Amos, Isaiah&hellip;)</span>
+                      <span class="pnative rtl">נְבִיאִים</span><span class="proman">Nevi&rsquo;im</span>
+                      <span class="pdates">8th&ndash;6th c. BCE</span></div>
+                    <div class="pdesc">Amos and Isaiah forge <em>ethical monotheism</em>: &ldquo;let justice roll down like waters&rdquo; &mdash; righteousness above sacrifice.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Sefer Amos · Yeshayahu</span>
+                      <a class="src" href="https://www.sefaria.org/Amos" target="_blank" rel="noopener">Sefaria · Amos</a>
+                      <a class="src alt" href="https://www.sefaria.org/Isaiah" target="_blank" rel="noopener">Isaiah</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+        <!-- ===================== PERSIA ===================== -->
+        <li class="civ" style="--cc:var(--per)">
+          <details class="civ-d" open>
+            <summary class="civ-h">
+              <span class="tw">▶</span><span class="cflag">🔥</span>
+              <span class="cname">Persia / Iran</span>
+              <span class="cnative rtl">ایران</span>
+              <span class="cera">date debated · c. 1200&ndash;600 BCE</span>
+              <span class="civ-tag">Cosmic dualism, free moral choice, and a final judgment &mdash; Zoroaster&rsquo;s revolution.</span>
+            </summary>
+            <ul>
+              <li>
+                <span class="school-h"><span class="sname">Zoroastrianism</span>
+                  <span class="snative rtl">مزدیسنا <span class="proman">Mazdayasna</span></span>
+                  <span class="sdesc">Asha (truth/order) against Druj (the lie); &ldquo;good thoughts, good words, good deeds.&rdquo;</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Zoroaster (Zarathustra)</span>
+                      <span class="pnative rtl">زرتشت</span>
+                      <span class="proman">Avestan: Zaraθuštra</span>
+                      <span class="pdates">c. 1200&ndash;600 BCE</span></div>
+                    <div class="pdesc">Prophet who reframed religion as a moral struggle between Ahura Mazda (Wise Lord) and Angra Mainyu &mdash; with human will as the deciding force, and history moving toward renewal.</div>
+                    <ul class="works">
+                      <li><span class="work"><span class="wtitle">The Gathas</span>
+                        <span class="wnative rtl">گاهان <span class="proman">Gāθā</span></span>
+                        <a class="src" href="https://www.avesta.org/gathas.htm" target="_blank" rel="noopener">avesta.org (Avestan + English)</a></span></li>
+                      <li><span class="work"><span class="wtitle">The Avesta (Yasna)</span>
+                        <span class="wnative rtl">اوستا</span>
+                        <a class="src" href="https://sacred-texts.com/zor/sbe31/yasnae.htm" target="_blank" rel="noopener">Sacred Texts · Yasna (SBE 31)</a>
+                        <a class="src alt" href="https://sacred-texts.com/zor/index.htm" target="_blank" rel="noopener">full Avesta</a></span></li>
+                    </ul>
+                  </div></li>
+                </ul>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+        <!-- ===================== INDIA ===================== -->
+        <li class="civ" style="--cc:var(--ind)">
+          <details class="civ-d" open>
+            <summary class="civ-h">
+              <span class="tw">▶</span><span class="cflag">🕉️</span>
+              <span class="cname">India</span>
+              <span class="cnative">भारत · <span class="proman">Bhārata</span></span>
+              <span class="cera">c. 1500 &ndash; 300 BCE</span>
+              <span class="civ-tag">Brahman &amp; Ātman, karma &amp; rebirth, liberation (mokṣa/nirvāṇa) &mdash; and India&rsquo;s great skeptics.</span>
+            </summary>
+            <ul>
+              <li>
+                <span class="school-h"><span class="sname">Vedic &amp; Upaniṣadic Tradition</span>
+                  <span class="snative">वेद · उपनिषद्</span>
+                  <span class="sdesc">From ritual hymns to the inward turn: the identity of Self (Ātman) and Absolute (Brahman).</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">The Vedas</span>
+                      <span class="pnative">वेद</span><span class="proman">Veda</span>
+                      <span class="pdates">c. 1500&ndash;900 BCE</span></div>
+                    <div class="pdesc">The four Vedas (esp. <em>Ṛgveda</em>) &mdash; hymn, sacrifice and the first cosmological speculation (the <em>Nāsadīya</em> &ldquo;Hymn of Creation&rdquo;).</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Ṛgveda</span><span class="wnative">ऋग्वेद</span>
+                      <a class="src" href="https://sacred-texts.com/hin/rigveda/index.htm" target="_blank" rel="noopener">Sacred Texts (Griffith tr.)</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">The Upaniṣads</span>
+                      <span class="pnative">उपनिषद्</span><span class="proman">Upaniṣad</span>
+                      <span class="pdates">c. 800&ndash;300 BCE</span></div>
+                    <div class="pdesc">The foundation of <em>Vedānta</em>: <em>Tat tvam asi</em> (&ldquo;That thou art&rdquo;), the unity of Ātman and Brahman, karma and rebirth. Principal texts: Bṛhadāraṇyaka, Chāndogya, Īśa, Kaṭha, Kena, Muṇḍaka.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Principal Upaniṣads</span>
+                      <a class="src" href="https://sacred-texts.com/hin/sbe01/index.htm" target="_blank" rel="noopener">Sacred Texts (SBE 1)</a>
+                      <a class="src alt" href="https://sacred-texts.com/hin/sbe15/index.htm" target="_blank" rel="noopener">SBE 15</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+              <li>
+                <span class="school-h"><span class="sname">The Śramaṇa Movement</span>
+                  <span class="snative">श्रमण</span>
+                  <span class="sdesc">Renouncer traditions outside Vedic authority &mdash; Jainism, Buddhism, Ājīvika.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Mahāvīra (Jainism)</span>
+                      <span class="pnative">महावीर / वर्धमान</span>
+                      <span class="proman">Vardhamāna</span>
+                      <span class="pdates">c. 599&ndash;527 BCE</span></div>
+                    <div class="pdesc">24th Tīrthaṅkara of Jainism: radical non-violence (<em>ahiṃsā</em>), many-sidedness of truth (<em>anekāntavāda</em>), and liberation of the soul (<em>jīva</em>) from karmic matter.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Jain Sūtras (Āgamas) &mdash; Ācārāṅga, Kalpa</span>
+                      <a class="src" href="https://sacred-texts.com/jai/index.htm" target="_blank" rel="noopener">Sacred Texts (SBE 22 &amp; 45)</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">The Buddha (Buddhism)</span>
+                      <span class="pnative">सिद्धार्थ गौतम / बुद्ध</span>
+                      <span class="proman">Siddhārtha Gautama</span>
+                      <span class="pdates">c. 563&ndash;483 BCE</span></div>
+                    <div class="pdesc">The Four Noble Truths and the Eightfold Path; impermanence (<em>anicca</em>), non-self (<em>anattā</em>) and dependent origination &mdash; a middle way to the cessation of suffering (<em>nibbāna</em>).</div>
+                    <ul class="works">
+                      <li><span class="work"><span class="wtitle">Dhammapada</span><span class="wnative">धम्मपद (Pāli)</span>
+                        <a class="src" href="https://sacred-texts.com/bud/sbe10/index.htm" target="_blank" rel="noopener">Sacred Texts (SBE 10)</a></span></li>
+                      <li><span class="work"><span class="wtitle">Pāli Canon (Tipiṭaka)</span>
+                        <a class="src alt" href="https://sacred-texts.com/bud/index.htm" target="_blank" rel="noopener">Sacred Texts: Buddhism</a></span></li>
+                    </ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Makkhali Gosāla (Ājīvika)</span>
+                      <span class="pnative">मक्खलि गोसाल</span>
+                      <span class="pdates">fl. c. 500 BCE</span></div>
+                    <div class="pdesc">Founder of the Ājīvikas: strict <em>determinism</em> (<em>niyati</em>) &mdash; all is fixed by fate, effort changes nothing. Known mainly through rival Buddhist &amp; Jain accounts.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">via Buddhist/Jain sources (Sāmaññaphala Sutta)</span>
+                      <a class="src alt" href="https://sacred-texts.com/bud/index.htm" target="_blank" rel="noopener">Sacred Texts: Buddhism</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+              <li>
+                <span class="school-h"><span class="sname">Heterodox &amp; Analytic Schools</span>
+                  <span class="snative">दर्शन <span class="proman">darśana</span></span>
+                  <span class="sdesc">Materialism, dualist analysis, and the science of language.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Cārvāka / Lokāyata</span>
+                      <span class="pnative">चार्वाक / लोकायत</span>
+                      <span class="pdates">attr. Bṛhaspati; pre-300 BCE</span></div>
+                    <div class="pdesc">India&rsquo;s materialist, empiricist school: only perception is valid knowledge; no soul, no afterlife. Its <em>Bārhaspatya-sūtras</em> are lost &mdash; preserved only in opponents&rsquo; refutations.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Bārhaspatya-sūtras (fragments)</span>
+                      <span class="wnote">survive only in quotation</span></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Kapila &amp; Sāṃkhya</span>
+                      <span class="pnative">कपिल · सांख्य</span>
+                      <span class="pdates">tradition pre-300 BCE</span></div>
+                    <div class="pdesc">One of the oldest <em>darśanas</em>: a dualism of consciousness (<em>puruṣa</em>) and primal matter (<em>prakṛti</em>), and an enumeration of reality&rsquo;s 25 principles.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">later Sāṃkhya-kārikā</span>
+                      <a class="src alt" href="https://sacred-texts.com/hin/index.htm" target="_blank" rel="noopener">Sacred Texts: Hinduism</a>
+                      <span class="wnote">earliest systematic text is later</span></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Pāṇini</span>
+                      <span class="pnative">पाणिनि</span>
+                      <span class="pdates">c. 5th&ndash;4th c. BCE</span></div>
+                    <div class="pdesc">The <em>Aṣṭādhyāyī</em>: a formal, generative grammar of Sanskrit of astonishing rigor &mdash; a landmark in the philosophy of language and early formal systems.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Aṣṭādhyāyī</span><span class="wnative">अष्टाध्यायी</span>
+                      <a class="src alt" href="https://archive.org/details/ashtadhyayitrans06paniuoft" target="_blank" rel="noopener">Vasu translation (Archive)</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+        <!-- ===================== CHINA ===================== -->
+        <li class="civ" style="--cc:var(--chn)">
+          <details class="civ-d" open>
+            <summary class="civ-h">
+              <span class="tw">▶</span><span class="cflag">☯️</span>
+              <span class="cname">China</span>
+              <span class="cnative">中國 · <span class="proman">Zhōngguó</span></span>
+              <span class="cera">c. 600 &ndash; 300 BCE</span>
+              <span class="civ-tag">The &ldquo;Hundred Schools of Thought&rdquo; (諸子百家) of the Spring &amp; Autumn and Warring States eras.</span>
+            </summary>
+            <ul>
+              <li>
+                <span class="school-h"><span class="sname">Confucianism</span>
+                  <span class="snative">儒家 <span class="proman">Rújiā</span></span>
+                  <span class="sdesc">Virtue (<em>rén</em>, 仁), ritual propriety (<em>lǐ</em>, 禮) and the cultivation of the noble person.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Confucius</span>
+                      <span class="pnative">孔子</span><span class="proman">Kǒngzǐ</span>
+                      <span class="pdates">551&ndash;479 BCE</span></div>
+                    <div class="pdesc">China&rsquo;s most influential teacher: ethics grounded in humaneness (<em>rén</em>), filial duty and the rectification of names; virtue, not force, as the basis of order.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">The Analects</span><span class="wnative">論語 <span class="proman">Lúnyǔ</span></span>
+                      <a class="src" href="https://ctext.org/analects" target="_blank" rel="noopener">Chinese Text Project (中 + EN)</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Mencius</span>
+                      <span class="pnative">孟子</span><span class="proman">Mèngzǐ</span>
+                      <span class="pdates">c. 372&ndash;289 BCE</span></div>
+                    <div class="pdesc">Argued human nature is innately good; developed the &ldquo;four sprouts&rdquo; of virtue and the people&rsquo;s right against unjust rulers (the Mandate of Heaven).</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Mencius</span><span class="wnative">孟子</span>
+                      <a class="src" href="https://ctext.org/mengzi" target="_blank" rel="noopener">Chinese Text Project (中 + EN)</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Xúnzǐ</span>
+                      <span class="pnative">荀子</span><span class="proman">Xúnzǐ</span>
+                      <span class="pdates">c. 310&ndash;235 BCE</span>
+                      <span class="badge boundary">~300</span></div>
+                    <div class="pdesc">Countered Mencius: human nature is crooked and must be reshaped by ritual and education. A rigorous, naturalistic Confucian (teacher of the Legalists).</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Xunzi</span><span class="wnative">荀子</span>
+                      <a class="src" href="https://ctext.org/xunzi" target="_blank" rel="noopener">Chinese Text Project (中 + EN)</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+              <li>
+                <span class="school-h"><span class="sname">Daoism</span>
+                  <span class="snative">道家 <span class="proman">Dàojiā</span></span>
+                  <span class="sdesc">The Way (<em>dào</em>, 道), spontaneity (<em>zìrán</em>) and effortless action (<em>wúwéi</em>, 無為).</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Laozi</span>
+                      <span class="pnative">老子</span><span class="proman">Lǎozǐ</span>
+                      <span class="pdates">trad. 6th c. BCE</span></div>
+                    <div class="pdesc">The (semi-legendary) sage of the <em>Dào</em>: the nameless source of all things, the power of yielding and emptiness, and rule by non-interference.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Dao De Jing</span><span class="wnative">道德經 <span class="proman">Dàodéjīng</span></span>
+                      <a class="src" href="https://ctext.org/dao-de-jing" target="_blank" rel="noopener">Chinese Text Project (中 + EN)</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Zhuangzi</span>
+                      <span class="pnative">莊子</span><span class="proman">Zhuāngzǐ</span>
+                      <span class="pdates">c. 369&ndash;286 BCE</span></div>
+                    <div class="pdesc">Playful, profound skepticism: the relativity of all perspectives (the butterfly dream), freedom from convention, and at-oneness with transformation.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Zhuangzi</span><span class="wnative">莊子</span>
+                      <a class="src" href="https://ctext.org/zhuangzi" target="_blank" rel="noopener">Chinese Text Project (中 + EN)</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+              <li>
+                <span class="school-h"><span class="sname">Mohism</span>
+                  <span class="snative">墨家 <span class="proman">Mòjiā</span></span>
+                  <span class="sdesc">Impartial care, consequentialist utility, anti-war &mdash; and early formal logic.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Mozi</span>
+                      <span class="pnative">墨子</span><span class="proman">Mòzǐ</span>
+                      <span class="pdates">c. 470&ndash;391 BCE</span></div>
+                    <div class="pdesc">Preached &ldquo;impartial love&rdquo; (<em>jiān&rsquo;ài</em>) and judged actions by benefit to all; opposed aggressive war and lavish ritual. The Mohist Canon pioneered logic &amp; optics.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Mozi</span><span class="wnative">墨子</span>
+                      <a class="src" href="https://ctext.org/mozi" target="_blank" rel="noopener">Chinese Text Project (中 + EN)</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+              <li>
+                <span class="school-h"><span class="sname">Legalism</span>
+                  <span class="snative">法家 <span class="proman">Fǎjiā</span></span>
+                  <span class="sdesc">Order through codified law (<em>fǎ</em>), statecraft (<em>shù</em>) and power (<em>shì</em>).</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Shang Yang</span>
+                      <span class="pnative">商鞅</span><span class="proman">Shāng Yāng</span>
+                      <span class="pdates">d. 338 BCE</span></div>
+                    <div class="pdesc">Reformer of Qin: strict, impartial law and reward/punishment over Confucian virtue &mdash; foundations of the bureaucratic state.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Book of Lord Shang</span><span class="wnative">商君書</span>
+                      <a class="src" href="https://ctext.org/shang-jun-shu" target="_blank" rel="noopener">Chinese Text Project (中 + EN)</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Han Feizi</span>
+                      <span class="pnative">韓非子</span><span class="proman">Hán Fēizǐ</span>
+                      <span class="pdates">c. 280&ndash;233 BCE</span>
+                      <span class="badge boundary">~300</span></div>
+                    <div class="pdesc">The great synthesizer of Legalism: a clear-eyed, often cynical theory of law, bureaucracy and political power that shaped China&rsquo;s first empire.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Han Feizi</span><span class="wnative">韓非子</span>
+                      <a class="src" href="https://ctext.org/han-feizi" target="_blank" rel="noopener">Chinese Text Project (中 + EN)</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+              <li>
+                <span class="school-h"><span class="sname">School of Names &amp; the Strategists</span>
+                  <span class="snative">名家 · 兵家</span>
+                  <span class="sdesc">Logic and paradox; and the philosophy of conflict.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Gongsun Long</span>
+                      <span class="pnative">公孫龍</span><span class="proman">Gōngsūn Lóng</span>
+                      <span class="pdates">c. 320&ndash;250 BCE</span></div>
+                    <div class="pdesc">Logician of the School of Names, famous for the paradox &ldquo;a white horse is not a horse&rdquo; &mdash; probing the relation of name, class and reality.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Gongsun Longzi</span><span class="wnative">公孫龍子</span>
+                      <a class="src" href="https://ctext.org/gongsunlongzi" target="_blank" rel="noopener">Chinese Text Project (中 + EN)</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Sun Tzu</span>
+                      <span class="pnative">孫子</span><span class="proman">Sūnzǐ</span>
+                      <span class="pdates">c. 544&ndash;496 BCE</span></div>
+                    <div class="pdesc">The philosophy of strategy: winning without battle, deception, timing and adaptation &mdash; a Daoist-tinged classic still studied worldwide.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">The Art of War</span><span class="wnative">孫子兵法 <span class="proman">Sūnzǐ Bīngfǎ</span></span>
+                      <a class="src" href="https://ctext.org/art-of-war" target="_blank" rel="noopener">Chinese Text Project (中 + EN)</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+              <li>
+                <span class="school-h"><span class="sname">Foundational Classics</span>
+                  <span class="snative">五經 <span class="proman">Wǔjīng</span></span>
+                  <span class="sdesc">The shared canon behind every school &mdash; cosmology, poetry, history, ritual.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Book of Changes (I Ching)</span>
+                      <span class="pnative">易經</span><span class="proman">Yìjīng</span>
+                      <span class="pdates">core c. 1000&ndash;750 BCE</span></div>
+                    <div class="pdesc">A divination manual that became a cosmology of change &mdash; yin/yang, the eight trigrams, and the patterned flux of all things.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">I Ching · Book of Songs · Documents</span>
+                      <a class="src" href="https://ctext.org/book-of-changes" target="_blank" rel="noopener">Yijing</a>
+                      <a class="src alt" href="https://ctext.org/book-of-poetry" target="_blank" rel="noopener">Shijing</a>
+                      <a class="src alt" href="https://ctext.org/shang-shu" target="_blank" rel="noopener">Shujing</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+        <!-- ===================== GREECE ===================== -->
+        <li class="civ" style="--cc:var(--grc)">
+          <details class="civ-d" open>
+            <summary class="civ-h">
+              <span class="tw">▶</span><span class="cflag">🏛️</span>
+              <span class="cname">Greece</span>
+              <span class="cnative">Ἑλλάς · <span class="proman">Hellás</span></span>
+              <span class="cera">c. 600 &ndash; 322 BCE</span>
+              <span class="civ-tag">From the first &ldquo;physicists&rdquo; of Miletus to Aristotle &mdash; the birth of systematic reason in the West.</span>
+            </summary>
+            <ul>
+              <li>
+                <span class="school-h"><span class="sname">Milesian / Ionian School</span>
+                  <span class="snative">φυσικοί</span>
+                  <span class="sdesc">The first to seek a natural <em>archē</em> (origin) of all things, without myth.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Thales of Miletus</span>
+                      <span class="pnative">Θαλῆς</span><span class="proman">Thalēs</span>
+                      <span class="pdates">c. 624&ndash;546 BCE</span></div>
+                    <div class="pdesc">Traditionally the &ldquo;first philosopher&rdquo;: proposed <em>water</em> as the fundamental principle and predicted a solar eclipse &mdash; explanation by nature, not gods.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Testimonia &amp; fragments</span>
+                      <a class="src" href="https://history.hanover.edu/texts/presoc/thales.html" target="_blank" rel="noopener">Hanover Historical Texts</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Anaximander</span>
+                      <span class="pnative">Ἀναξίμανδρος</span><span class="proman">Anaximandros</span>
+                      <span class="pdates">c. 610&ndash;546 BCE</span></div>
+                    <div class="pdesc">The <em>apeiron</em> (the boundless) as origin; an early evolutionary and cosmological vision. Author of the first Greek prose treatise, <em>On Nature</em>.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">On Nature (Περὶ φύσεως), fragments</span>
+                      <a class="src" href="https://history.hanover.edu/texts/presoc/anaximan.html" target="_blank" rel="noopener">Hanover Historical Texts</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Anaximenes</span>
+                      <span class="pnative">Ἀναξιμένης</span><span class="proman">Anaximenēs</span>
+                      <span class="pdates">c. 586&ndash;526 BCE</span></div>
+                    <div class="pdesc">Held <em>air</em> (<em>aēr</em>) to be the source, condensing and rarefying into all things &mdash; an early mechanism of qualitative change.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Fragments</span>
+                      <a class="src" href="https://history.hanover.edu/texts/presoc/anaximen.html" target="_blank" rel="noopener">Hanover Historical Texts</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+              <li>
+                <span class="school-h"><span class="sname">Pythagoreans &amp; Eleatics</span>
+                  <span class="snative">Πυθαγόρειοι · Ἐλεᾶται</span>
+                  <span class="sdesc">Number &amp; soul; and the logic of Being and the One.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Pythagoras</span>
+                      <span class="pnative">Πυθαγόρας</span><span class="proman">Pythagóras</span>
+                      <span class="pdates">c. 570&ndash;495 BCE</span></div>
+                    <div class="pdesc">&ldquo;All is number&rdquo;: mathematics as the structure of reality, the harmony of the spheres, and the transmigration of the soul.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Testimonia (no writings survive)</span>
+                      <a class="src" href="https://history.hanover.edu/texts/presoc/pythagor.html" target="_blank" rel="noopener">Hanover Historical Texts</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Xenophanes</span>
+                      <span class="pnative">Ξενοφάνης</span><span class="proman">Xenophanēs</span>
+                      <span class="pdates">c. 570&ndash;478 BCE</span></div>
+                    <div class="pdesc">Critic of anthropomorphic gods (&ldquo;oxen would draw gods like oxen&rdquo;); pointed toward a single, non-human divine and the limits of knowledge.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Fragments</span>
+                      <a class="src" href="https://history.hanover.edu/texts/presoc/Xenophan.html" target="_blank" rel="noopener">Hanover Historical Texts</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Heraclitus</span>
+                      <span class="pnative">Ἡράκλειτος</span><span class="proman">Hērákleitos</span>
+                      <span class="pdates">c. 535&ndash;475 BCE</span></div>
+                    <div class="pdesc">&ldquo;Everything flows&rdquo; (<em>panta rhei</em>): reality is process, unified by the <em>Logos</em> and the tension of opposites. &ldquo;You cannot step twice into the same river.&rdquo;</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">On Nature, fragments</span>
+                      <a class="src" href="https://en.wikisource.org/wiki/Fragments_of_Heraclitus" target="_blank" rel="noopener">Wikisource (Greek + English)</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Parmenides</span>
+                      <span class="pnative">Παρμενίδης</span><span class="proman">Parmenidēs</span>
+                      <span class="pdates">c. 515&ndash;450 BCE</span></div>
+                    <div class="pdesc">Founder of Eleatic metaphysics &amp; logic: Being simply <em>is</em>, one and changeless; change and plurality are illusions of the senses.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">On Nature (poem), fragments</span>
+                      <a class="src" href="https://history.hanover.edu/texts/presoc/parmends.html" target="_blank" rel="noopener">Hanover Historical Texts</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Zeno of Elea</span>
+                      <span class="pnative">Ζήνων ὁ Ἐλεάτης</span><span class="proman">Zēnōn</span>
+                      <span class="pdates">c. 490&ndash;430 BCE</span></div>
+                    <div class="pdesc">Defended Parmenides with the famous <em>paradoxes of motion</em> (Achilles &amp; the tortoise) &mdash; the dawn of rigorous proof and the infinite.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Paradoxes, fragments</span>
+                      <a class="src" href="https://history.hanover.edu/texts/presoc/zeno.html" target="_blank" rel="noopener">Hanover Historical Texts</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+              <li>
+                <span class="school-h"><span class="sname">Pluralists &amp; Atomists</span>
+                  <span class="snative">φυσιολόγοι</span>
+                  <span class="sdesc">Saving the appearances of change after Parmenides &mdash; elements, Mind, and atoms.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Empedocles</span>
+                      <span class="pnative">Ἐμπεδοκλῆς</span><span class="proman">Empedoklēs</span>
+                      <span class="pdates">c. 494&ndash;434 BCE</span></div>
+                    <div class="pdesc">Four &ldquo;roots&rdquo; (earth, water, air, fire) mixed by Love and parted by Strife &mdash; the ancestor of the four-element theory.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">On Nature · Purifications, fragments</span>
+                      <a class="src" href="https://history.hanover.edu/texts/presoc/emp.html" target="_blank" rel="noopener">Hanover Historical Texts</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Anaxagoras</span>
+                      <span class="pnative">Ἀναξαγόρας</span><span class="proman">Anaxagóras</span>
+                      <span class="pdates">c. 500&ndash;428 BCE</span></div>
+                    <div class="pdesc">&ldquo;In everything a portion of everything&rdquo;; cosmic <em>Nous</em> (Mind) orders the universe &mdash; the first to make intelligence a first principle.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">On Nature, fragments</span>
+                      <a class="src" href="https://history.hanover.edu/texts/presoc/anaxagor.html" target="_blank" rel="noopener">Hanover Historical Texts</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Leucippus &amp; Democritus</span>
+                      <span class="pnative">Λεύκιππος · Δημόκριτος</span><span class="proman">Dēmókritos</span>
+                      <span class="pdates">c. 460&ndash;370 BCE</span></div>
+                    <div class="pdesc">Founders of <em>atomism</em>: nothing exists but atoms and void; a fully materialist, mechanistic cosmos &mdash; later inherited by Epicurus.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Fragments (atomist)</span>
+                      <a class="src" href="https://archive.org/details/firstphilosopher00fairiala" target="_blank" rel="noopener">Fairbanks, <em>First Philosophers of Greece</em></a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+              <li>
+                <span class="school-h"><span class="sname">Sophists</span>
+                  <span class="snative">σοφισταί</span>
+                  <span class="sdesc">Teachers of rhetoric &amp; virtue; relativism and the human measure.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Protagoras</span>
+                      <span class="pnative">Πρωταγόρας</span><span class="proman">Prōtagóras</span>
+                      <span class="pdates">c. 490&ndash;420 BCE</span></div>
+                    <div class="pdesc">&ldquo;Man is the measure of all things&rdquo; &mdash; the founding statement of relativism and humanistic skepticism about the gods.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">via Plato&rsquo;s <em>Protagoras</em></span>
+                      <a class="src" href="https://www.perseus.tufts.edu/hopper/collection?collection=Perseus:corpus:perseus,author,Plato" target="_blank" rel="noopener">Perseus (Greek + English)</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Gorgias</span>
+                      <span class="pnative">Γοργίας</span><span class="proman">Gorgías</span>
+                      <span class="pdates">c. 483&ndash;375 BCE</span></div>
+                    <div class="pdesc">Master rhetorician and radical skeptic: in <em>On Non-Existence</em>, argued nothing exists, or if it does, it can be neither known nor communicated.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Encomium of Helen · via Plato&rsquo;s <em>Gorgias</em></span>
+                      <a class="src" href="https://www.perseus.tufts.edu/hopper/collection?collection=Perseus:corpus:perseus,author,Plato" target="_blank" rel="noopener">Perseus (Greek + English)</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+              <li>
+                <span class="school-h"><span class="sname">The Classical Triad</span>
+                  <span class="snative">Σωκράτης · Πλάτων · Ἀριστοτέλης</span>
+                  <span class="sdesc">Ethics, the theory of Forms, logic and the systematic organization of all knowledge.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Socrates</span>
+                      <span class="pnative">Σωκράτης</span><span class="proman">Sōkrátēs</span>
+                      <span class="pdates">470&ndash;399 BCE</span></div>
+                    <div class="pdesc">Turned philosophy to ethics &amp; self-knowledge through relentless questioning (the <em>elenchus</em>): &ldquo;the unexamined life is not worth living.&rdquo; Wrote nothing; known via his pupils.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Plato&rsquo;s <em>Apology</em> (Ἀπολογία)</span>
+                      <a class="src" href="https://classics.mit.edu/Plato/apology.html" target="_blank" rel="noopener">MIT Classics</a>
+                      <a class="src alt" href="https://www.perseus.tufts.edu/hopper/collection?collection=Perseus:corpus:perseus,author,Plato" target="_blank" rel="noopener">Perseus (Greek)</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Plato</span>
+                      <span class="pnative">Πλάτων</span><span class="proman">Plátōn</span>
+                      <span class="pdates">c. 428&ndash;348 BCE</span></div>
+                    <div class="pdesc">The Theory of Forms, the immortal soul, the tripartite city &amp; psyche, and the philosopher-king. Founder of the Academy; author of the dialogues.</div>
+                    <ul class="works">
+                      <li><span class="work"><span class="wtitle">Republic (Πολιτεία)</span>
+                        <a class="src" href="https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.01.0168" target="_blank" rel="noopener">Perseus (Greek + English)</a>
+                        <a class="src alt" href="https://classics.mit.edu/Plato/republic.html" target="_blank" rel="noopener">MIT</a></span></li>
+                      <li><span class="work"><span class="wtitle">all dialogues (Phaedo, Symposium, Timaeus&hellip;)</span>
+                        <a class="src" href="https://www.perseus.tufts.edu/hopper/collection?collection=Perseus:corpus:perseus,author,Plato" target="_blank" rel="noopener">Perseus · Plato</a></span></li>
+                    </ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Aristotle</span>
+                      <span class="pnative">Ἀριστοτέλης</span><span class="proman">Aristotélēs</span>
+                      <span class="pdates">384&ndash;322 BCE</span></div>
+                    <div class="pdesc">The most encompassing mind of antiquity: founder of formal logic, biology and systematic ethics. Virtue as the mean; the four causes; the Unmoved Mover.</div>
+                    <ul class="works">
+                      <li><span class="work"><span class="wtitle">Nicomachean Ethics (Ἠθικὰ Νικομάχεια)</span>
+                        <a class="src" href="https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.01.0053" target="_blank" rel="noopener">Perseus (Greek + English)</a></span></li>
+                      <li><span class="work"><span class="wtitle">Politics · Metaphysics · Organon</span>
+                        <a class="src alt" href="https://classics.mit.edu/Aristotle/politics.html" target="_blank" rel="noopener">Politics</a>
+                        <a class="src alt" href="https://classics.mit.edu/Aristotle/metaphysics.html" target="_blank" rel="noopener">Metaphysics</a>
+                        <a class="src alt" href="https://www.perseus.tufts.edu/hopper/collection?collection=Perseus:corpus:perseus,author,Aristotle" target="_blank" rel="noopener">Perseus · Aristotle</a></span></li>
+                    </ul>
+                  </div></li>
+                </ul>
+              </li>
+              <li>
+                <span class="school-h"><span class="sname">Cynics, Cyrenaics &amp; the Hellenistic Turn</span>
+                  <span class="snative">Κυνικοί · Κυρηναϊκοί</span>
+                  <span class="sdesc">The art of living &mdash; and the schools founded right at the 300 BCE boundary.</span></span>
+                <ul>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Diogenes of Sinope (Cynicism)</span>
+                      <span class="pnative">Διογένης</span><span class="proman">Diogénēs</span>
+                      <span class="pdates">c. 412&ndash;323 BCE</span></div>
+                    <div class="pdesc">With Antisthenes, founded Cynicism: virtue is the only good, lived in radical self-sufficiency and shameless freedom from convention (&ldquo;I am a citizen of the world&rdquo;).</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">via Diogenes Laërtius, <em>Lives</em> VI</span>
+                      <a class="src" href="https://en.wikisource.org/wiki/Lives_of_the_Eminent_Philosophers/Book_VI" target="_blank" rel="noopener">Wikisource · Lives, Bk VI</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Epicurus (Epicureanism)</span>
+                      <span class="pnative">Ἐπίκουρος</span><span class="proman">Epíkouros</span>
+                      <span class="pdates">341&ndash;270 BCE</span>
+                      <span class="badge boundary">~300</span></div>
+                    <div class="pdesc">Pleasure as freedom from pain and fear (<em>ataraxia</em>); an atomist, materialist ethics. Founded &ldquo;the Garden&rdquo; c. 306 BCE.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">Letter to Menoeceus · Principal Doctrines</span>
+                      <a class="src" href="https://en.wikisource.org/wiki/Lives_of_the_Eminent_Philosophers/Book_X" target="_blank" rel="noopener">Wikisource · Lives, Bk X</a></span></li></ul>
+                  </div></li>
+                  <li class="entry"><div class="person">
+                    <div class="pl"><span class="pname">Zeno of Citium (Stoicism)</span>
+                      <span class="pnative">Ζήνων ὁ Κιτιεύς</span><span class="proman">Zēnōn</span>
+                      <span class="pdates">c. 334&ndash;262 BCE</span>
+                      <span class="badge boundary">~300</span></div>
+                    <div class="pdesc">Founded Stoicism c. 300 BCE: live &ldquo;according to nature&rdquo; and reason; virtue alone is good, externals indifferent. Writings survive only in fragments.</div>
+                    <ul class="works"><li><span class="work"><span class="wtitle">via Diogenes Laërtius, <em>Lives</em> VII</span>
+                      <a class="src" href="https://en.wikisource.org/wiki/Lives_of_the_Eminent_Philosophers/Book_VII" target="_blank" rel="noopener">Wikisource · Lives, Bk VII</a></span></li></ul>
+                  </div></li>
+                </ul>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+      </ul>
+    </li>
+  </ul>
+
+  <p class="nb" id="noresults" style="display:none;text-align:center;padding:24px;color:var(--muted)">
+    No matches. Try a broader term &mdash; e.g. a school (&ldquo;Daoism&rdquo;), a concept (&ldquo;atoms&rdquo;, &ldquo;justice&rdquo;), or a language (&ldquo;Sanskrit&rdquo;).
+  </p>
+
+  <footer class="page">
+    <h3>About this tree &amp; its sources</h3>
+    <p>Seven civilizations, more than 50 thinkers and texts. &ldquo;Before 300&nbsp;BCE&rdquo; is read inclusively: a few figures (Aristotle, Xunzi, Han Feizi, Epicurus, Zeno of Citium) span or just cross the line and are marked <span class="badge boundary">~300</span>. The Indian and Mesopotamian/Egyptian traditions reach back over a millennium earlier.</p>
+    <p>Every &ldquo;📜&rdquo; link points to a freely readable online edition &mdash; in the original language where the script survives (Greek, Chinese, Hebrew, Sanskrit, Avestan), otherwise in a standard scholarly translation. Principal digital libraries used:</p>
+    <div class="srcgrid">
+      <span>📜 <a href="https://ctext.org/" target="_blank" rel="noopener">Chinese Text Project</a> &mdash; Classical Chinese + English</span>
+      <span>📜 <a href="https://sacred-texts.com/" target="_blank" rel="noopener">Internet Sacred Text Archive</a></span>
+      <span>📜 <a href="https://www.sefaria.org/texts/Tanakh" target="_blank" rel="noopener">Sefaria</a> &mdash; Hebrew Bible</span>
+      <span>📜 <a href="https://www.perseus.tufts.edu/hopper/" target="_blank" rel="noopener">Perseus Digital Library</a> &mdash; Greek &amp; Latin</span>
+      <span>📜 <a href="https://classics.mit.edu/" target="_blank" rel="noopener">MIT Internet Classics Archive</a></span>
+      <span>📜 <a href="https://history.hanover.edu/texts/presoc/" target="_blank" rel="noopener">Hanover &mdash; Pre-Socratics</a></span>
+      <span>📜 <a href="https://www.avesta.org/" target="_blank" rel="noopener">Avesta.org</a> &mdash; Zoroastrian texts</span>
+      <span>📜 <a href="https://etcsl.orinst.ox.ac.uk/" target="_blank" rel="noopener">ETCSL (Oxford)</a> &mdash; Sumerian literature</span>
+      <span>📜 <a href="https://avalon.law.yale.edu/ancient/hamframe.asp" target="_blank" rel="noopener">Yale Avalon Project</a> &mdash; ancient law</span>
+      <span>📜 <a href="https://en.wikisource.org/" target="_blank" rel="noopener">Wikisource</a> &mdash; public-domain editions</span>
+      <span>📜 <a href="https://www.gutenberg.org/" target="_blank" rel="noopener">Project Gutenberg</a></span>
+      <span>📜 <a href="https://gretil.sub.uni-goettingen.de/" target="_blank" rel="noopener">GRETIL</a> &mdash; Sanskrit e-texts</span>
+    </div>
+    <p class="disclaim">Dates, attributions and groupings reflect mainstream scholarship and are necessarily simplified; the most ancient figures (Laozi, Zoroaster, Homer-era texts, Vedic and Egyptian authors) carry genuine uncertainty. Native-script names are given to honor each tradition&rsquo;s own voice; some archaic scripts (Avestan, cuneiform, hieroglyphic) may not render on every device. Built June 2026.</p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var tree=document.getElementById('tree');
+  var details=Array.prototype.slice.call(tree.querySelectorAll('details.civ-d'));
+  var entries=Array.prototype.slice.call(tree.querySelectorAll('li.entry'));
+  var filter=document.getElementById('filter');
+  var count=document.getElementById('count');
+  var noresults=document.getElementById('noresults');
+
+  document.getElementById('expandAll').addEventListener('click',function(){details.forEach(function(d){d.open=true});});
+  document.getElementById('collapseAll').addEventListener('click',function(){details.forEach(function(d){d.open=false});});
+
+  count.textContent = entries.length + ' entries · 7 civilizations';
+
+  // pre-compute lowercased searchable text per entry
+  entries.forEach(function(e){ e._txt=(e.textContent||'').toLowerCase(); });
+
+  function clearMarks(root){
+    root.querySelectorAll('mark').forEach(function(m){
+      var t=document.createTextNode(m.textContent); m.parentNode.replaceChild(t,m);
+    });
+  }
+
+  var t=null;
+  filter.addEventListener('input',function(){
+    if(t) clearTimeout(t);
+    t=setTimeout(run,90);
+  });
+
+  function run(){
+    var q=filter.value.trim().toLowerCase();
+    var anyGlobal=false;
+    if(!q){
+      entries.forEach(function(e){ e.style.display=''; });
+      details.forEach(function(d){ d.style.display=''; d.open=true; var b=d.parentNode; b.style.display=''; });
+      noresults.style.display='none';
+      count.textContent = entries.length + ' entries · 7 civilizations';
+      return;
+    }
+    details.forEach(function(d){
+      var li=d.parentNode;            // the civ <li>
+      var localMatch=false;
+      var headTxt=(d.querySelector('summary').textContent||'').toLowerCase();
+      // school groups inside
+      var ent=Array.prototype.slice.call(d.querySelectorAll('li.entry'));
+      ent.forEach(function(e){
+        var hit=e._txt.indexOf(q)>-1 || headTxt.indexOf(q)>-1;
+        e.style.display = hit ? '' : 'none';
+        if(hit){localMatch=true;}
+      });
+      // also handle school <li> wrappers: hide those with no visible entries
+      Array.prototype.slice.call(d.querySelectorAll(':scope > ul > li')).forEach(function(group){
+        var any=Array.prototype.some.call(group.querySelectorAll('li.entry'),function(e){return e.style.display!=='none';});
+        // keep group visible if it has a visible entry OR the school header matches
+        var ghead=(group.querySelector('.school-h')||{textContent:''}).textContent.toLowerCase();
+        if(any || ghead.indexOf(q)>-1){ group.style.display=''; if(ghead.indexOf(q)>-1){ Array.prototype.forEach.call(group.querySelectorAll('li.entry'),function(e){e.style.display='';}); localMatch=true; } }
+        else { group.style.display='none'; }
+      });
+      if(localMatch){ li.style.display=''; d.style.display=''; d.open=true; anyGlobal=true; }
+      else { li.style.display='none'; }
+    });
+    noresults.style.display = anyGlobal ? 'none' : '';
+    var shownCount = entries.filter(function(e){return e.style.display!=='none' && e.offsetParent!==null;}).length;
+    count.textContent = shownCount + ' match' + (shownCount===1?'':'es');
+  }
+})();
+</script>
+</body>
+</html>
