@@ -83,7 +83,8 @@
   .tooltip{position:fixed;pointer-events:none;z-index:60;max-width:300px;padding:8px 11px;border-radius:9px;
     background:rgba(16,22,29,.97);border:1px solid var(--line);font-size:12.5px;color:var(--ink);opacity:0;transition:opacity .1s}
   text.nodelabel{font-family:inherit;font-size:11px;fill:var(--ink);paint-order:stroke;stroke:#0c1116;stroke-width:3px;pointer-events:none}
-  text.themelabel{font-family:inherit;font-size:14px;font-weight:600;letter-spacing:.7px;opacity:.85;paint-order:stroke;stroke:#0c1116;stroke-width:4px;text-transform:uppercase;pointer-events:none}
+  text.themelabel{font-family:inherit;font-size:14px;font-weight:600;letter-spacing:.7px;opacity:.82;paint-order:stroke;stroke:#0c1116;stroke-width:4px;text-transform:uppercase;pointer-events:auto;cursor:pointer;transition:opacity .12s}
+  text.themelabel:hover{opacity:1}
   .btn.on{border-color:var(--gold);color:var(--gold2)}
 
   /* tree view */
@@ -257,6 +258,7 @@ DATA.nodes.forEach(n=>{ n.x0=n.x; n.y0=n.y; });
 let activeCivs = new Set(DATA.civs);
 let activeRels = new Set(Object.keys(DATA.relTypes));
 let selected = null;
+let selectedTheme = null;
 function withYear(n){return n && n.year ? `${n.label} (${n.year})` : (n ? n.label : "");}
 
 /* ---------------- speech: pronounce a concept in its original language ---------------- */
@@ -379,7 +381,7 @@ DATA.nodes.forEach(n=>{
   n._lab=lab; gLabels.append(lab);
   c.addEventListener("mouseenter",ev=>hover(n,ev));
   c.addEventListener("mousemove",ev=>moveTip(ev));
-  c.addEventListener("mouseleave",()=>{hideTip();if(!selected)clearHi();else highlight(selected);});
+  c.addEventListener("mouseleave",()=>{hideTip();restoreHighlight();});
   c.addEventListener("mousedown",ev=>startDrag(n,ev));
   c.addEventListener("click",ev=>{ev.stopPropagation();select(n);});
   c.addEventListener("dblclick",ev=>{ev.stopPropagation();if(n.source_url)window.open(n.source_url,"_blank","noopener");});
@@ -393,6 +395,8 @@ DATA.nodes.forEach(n=>{(themeMembers[n.theme]=themeMembers[n.theme]||[]).push(n.
 const themeVis=DATA.themes.map(th=>{
   const label=svgEl("text",{"text-anchor":"middle"}); label.setAttribute("class","themelabel");
   label.textContent=th.short||th.label; label.style.fill=th.color;
+  label.addEventListener("mousedown",ev=>ev.stopPropagation());
+  label.addEventListener("click",ev=>{ev.stopPropagation();selectTheme(th);});
   gThemeLabels.append(label);
   return {label,ids:themeMembers[th.key]||[]};
 });
@@ -462,7 +466,7 @@ window.addEventListener("mousemove",ev=>{
   else if(pan){view.x=pan.ox+(ev.clientX-pan.sx);view.y=pan.oy+(ev.clientY-pan.sy);redraw();}
 });
 window.addEventListener("mouseup",()=>{drag=null;pan=null;svg.classList.remove("grab");});
-svg.addEventListener("click",()=>{if(selected){selected=null;clearHi();showPanelEmpty();}});
+svg.addEventListener("click",()=>{if(selected||selectedTheme){selected=null;selectedTheme=null;clearHi();showPanelEmpty();}});
 svg.addEventListener("wheel",ev=>{ev.preventDefault();const r=svg.getBoundingClientRect();
   const mx=ev.clientX-r.left,my=ev.clientY-r.top;const f=ev.deltaY<0?1.12:0.89;
   const k2=Math.max(0.25,Math.min(4,view.k*f));
@@ -481,7 +485,7 @@ function edgeVisible(e){return activeRels.has(e.type)&&visible(nodeById.get(e.s)
 function applyFilters(){
   DATA.nodes.forEach(n=>{const v=visible(n);n._c.style.display=v?"":"none";n._lab.style.display="none";});
   DATA.edges.forEach(e=>{e._ln.style.display=edgeVisible(e)?"":"none";});
-  if(selected&&visible(selected))highlight(selected);else clearHi();
+  restoreHighlight();
   renderThemeLayer();                        // topic regions follow the visible nodes
   renderHighlights();                       // filters also drive the bridges/debates pane
   if(curView==="tree") renderTree();         // …and the taxonomy tree
@@ -526,7 +530,7 @@ $("#search").addEventListener("input",e=>{
 
 /* ---------------- selection + detail panel ---------------- */
 function showPanelEmpty(){$("#panelBody").style.display="none";$("#panelEmpty").style.display="";}
-function select(n){selected=n;highlight(n);renderPanel(n);
+function select(n){selected=n;selectedTheme=null;highlight(n);renderPanel(n);
   if(curView==="tree"){const c=document.getElementById("card-"+cssId(n.id));if(c)c.scrollIntoView({behavior:"smooth",block:"center"});}}
 function cssId(s){return s.replace(/[^a-z0-9]/gi,"_");}
 
@@ -569,6 +573,39 @@ function renderPanel(n){
 }
 
 /* ---------------- highlights ---------------- */
+/* ---------------- topic (theme) selection ---------------- */
+function highlightTheme(th){
+  const keep=new Set(); th.stances.forEach(s=>s.ids.forEach(id=>keep.add(id)));
+  DATA.nodes.forEach(m=>{const vis=visible(m);m._c.style.opacity=vis?(keep.has(m.id)?1:.1):0;
+    m._lab.style.display=(vis&&keep.has(m.id)&&m.degree>=9)?"":"none";});
+  DATA.edges.forEach(e=>{const on=keep.has(e.s)&&keep.has(e.t)&&edgeVisible(e);
+    e._ln.style.opacity=on?.85:(edgeVisible(e)?.04:0);});
+}
+function restoreHighlight(){ if(selected&&visible(selected))highlight(selected); else if(selectedTheme)highlightTheme(selectedTheme); else clearHi(); }
+function selectTheme(th){ if(curView!=="graph")setView("graph"); selected=null; selectedTheme=th; highlightTheme(th); renderThemePanel(th); }
+function renderThemePanel(th){
+  $("#panelEmpty").style.display="none"; const b=$("#panelBody"); b.style.display=""; b.innerHTML="";
+  const title=el("div",{class:"pname"}, th.label); title.style.color=th.color; b.append(title);
+  const members=[]; th.stances.forEach(s=>s.ids.forEach(id=>members.push(nodeById.get(id))));
+  const civs=[...new Set(members.map(m=>m.civ))];
+  const meta=el("div",{class:"meta"});
+  const t0=el("span",{class:"tag"},"◆ topic"); t0.style.borderColor=th.color; t0.style.color=th.color;
+  meta.append(t0, el("span",{class:"tag"}, th.count+" ideas"), el("span",{class:"tag"}, civs.length+" civilizations"));
+  b.append(meta);
+  b.append(el("div",{class:"ptext"}, th.blurb));
+  const fb=el("button",{class:"btn",title:"zoom the map to this topic"}, "◎ focus in the map");
+  fb.style.margin="4px 0 8px"; fb.onclick=()=>{highlightTheme(th); zoomToNodes(members.filter(visible));};
+  b.append(fb);
+  th.stances.forEach(st=>{
+    b.append(el("h5",{}, st.stance.replace(/-/g," ")+" · "+st.ids.length));
+    st.ids.forEach(id=>{const m=nodeById.get(id);
+      const row=el("div",{class:"rel"}); const k=el("span",{class:"rk"},"•"); k.style.color=m.color;
+      const tx=el("div"); tx.append(el("div",{class:"rt"}, withYear(m)+" · "+m.civ), el("div",{class:"rx"}, m.text));
+      row.append(k,tx); row.onclick=()=>select(m); b.append(row);
+    });
+  });
+}
+
 function flagPill(civ){const p=el("span",{class:"cc"},civ);p.style.borderColor=DATA.civColors[civ];p.style.color=DATA.civColors[civ];return p;}
 function quoteBlock(id){                     // dual-language quotation + a voice button per language
   const n=nodeById.get(id);
