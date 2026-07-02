@@ -86,6 +86,18 @@
   text.themelabel{font-family:inherit;font-size:14px;font-weight:600;letter-spacing:.7px;opacity:.82;paint-order:stroke;stroke:#0c1116;stroke-width:4px;text-transform:uppercase;pointer-events:auto;cursor:pointer;transition:opacity .12s}
   text.themelabel:hover{opacity:1}
   .btn.on{border-color:var(--gold);color:var(--gold2)}
+  /* live tuning panel */
+  #tunePanel{position:absolute;right:12px;top:44px;z-index:40;width:222px;font-size:12px;color:var(--ink);
+    background:rgba(12,17,22,.93);border:1px solid var(--line);border-radius:11px;padding:11px 12px;backdrop-filter:blur(5px)}
+  #tunePanel h5{margin:0 0 4px;font-size:12.5px;color:var(--gold2);display:flex;justify-content:space-between;align-items:center}
+  #tunePanel .tclose{cursor:pointer;color:var(--faint);font-size:14px}#tunePanel .tclose:hover{color:var(--gold2)}
+  #tunePanel label{display:flex;justify-content:space-between;margin:9px 0 1px;color:var(--muted)}
+  #tunePanel label b{color:var(--ink);font-weight:600}
+  #tunePanel input[type=range]{width:100%;accent-color:var(--gold);cursor:pointer;margin:0}
+  #tunePanel .thd{margin:11px 0 1px;font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--faint)}
+  #tunePanel .trow{display:flex;gap:6px;margin-top:11px}
+  #tunePanel .trow .btn{flex:1;padding:6px 4px;font-size:11.5px;text-align:center}
+  #tunePanel .tnote{margin-top:10px;font-size:10px;color:var(--faint);line-height:1.4}
 
   /* tree view */
   #treeWrap{display:none}
@@ -205,6 +217,7 @@
     <button class="btn on" id="toggleTopics">🗺 Topics</button>
     <button class="btn" id="relax">✦ Relax layout</button>
     <button class="btn" id="reset">⟲ Reset view</button>
+    <button class="btn" id="tuneBtn">⚙ Tune</button>
   </div>
 
   <div class="filters">
@@ -226,6 +239,18 @@
         <svg id="graph"></svg>
         <div class="glegend" id="glegend"></div>
         <div class="ghint">drag nodes · scroll to zoom · pan background · <b style="color:var(--gold2)">double-click a node → original text</b></div>
+        <div id="tunePanel" style="display:none">
+          <h5>⚙ Live tuning <span class="tclose" id="tuneClose">✕</span></h5>
+          <div class="thd">Force layout</div>
+          <label>Repulsion <b id="vRep"></b></label><input type="range" id="tRep" min="5" max="80" step="1">
+          <label>Link pull <b id="vLink"></b></label><input type="range" id="tLink" min="0" max="3" step="0.1">
+          <label>Gravity <b id="vGrav"></b></label><input type="range" id="tGrav" min="0" max="0.08" step="0.002">
+          <div class="trow"><button class="btn" id="tRun">▶ Run</button><button class="btn" id="tReset">⟲ Positions</button></div>
+          <div class="thd">Display</div>
+          <label>Min edge strength <b id="vEdge"></b></label><input type="range" id="tEdge" min="0" max="1" step="0.01">
+          <label>Labels: degree ≥ <b id="vLab"></b></label><input type="range" id="tLab" min="0" max="20" step="1">
+          <div class="tnote">Live view/layout knobs. Corpus-level generation (similarity cutoff, cluster count, TF-IDF) is set in the Python pipeline.</div>
+        </div>
       </div>
       <div id="treeWrap"></div>
     </div>
@@ -257,6 +282,7 @@ DATA.edges.forEach(e=>{ adj.get(e.s).push(e); adj.get(e.t).push(e); });
 DATA.nodes.forEach(n=>{ n.x0=n.x; n.y0=n.y; });
 let activeCivs = new Set(DATA.civs);
 let activeRels = new Set(Object.keys(DATA.relTypes));
+const TUNE = {rep:18, link:1, grav:0.02, edgeMin:0, labDeg:10};   // live view/layout knobs
 let selected = null;
 let selectedTheme = null;
 function withYear(n){return n && n.year ? `${n.label} (${n.year})` : (n ? n.label : "");}
@@ -435,7 +461,7 @@ function fitView(){
   view.x=w/2-view.k*(minx+maxx)/2; view.y=h/2-view.k*(miny+maxy)/2; redraw();
 }
 function showHubLabels(){const k=view.k;DATA.nodes.forEach(n=>{
-  n._lab.style.display=(visible(n)&&(k>=1.5||(n.degree>=10&&k>=0.9)))?"":"none";});}
+  n._lab.style.display=(visible(n)&&(k>=1.5||(n.degree>=TUNE.labDeg&&k>=0.9)))?"":"none";});}
 
 /* ---------------- interactions ---------------- */
 const tip=$("#tip");
@@ -484,7 +510,7 @@ function updateNode(n){const p=project(n);
 let searchHit=null;
 function visible(n){ if(!activeCivs.has(n.civ))return false;
   if(searchHit && !searchHit.has(n.id))return false; return true; }
-function edgeVisible(e){return activeRels.has(e.type)&&visible(nodeById.get(e.s))&&visible(nodeById.get(e.t));}
+function edgeVisible(e){return activeRels.has(e.type)&&e.score>=TUNE.edgeMin&&visible(nodeById.get(e.s))&&visible(nodeById.get(e.t));}
 function applyFilters(){
   DATA.nodes.forEach(n=>{const v=visible(n);n._c.style.display=v?"":"none";n._lab.style.display="none";});
   DATA.edges.forEach(e=>{e._ln.style.display=edgeVisible(e)?"":"none";});
@@ -716,23 +742,41 @@ function setView(v){curView=v;
 }
 document.querySelectorAll("#viewSeg button").forEach(b=>b.onclick=()=>setView(b.dataset.view));
 
-/* ---------------- relax (simple force tick) ---------------- */
-$("#relax").onclick=()=>{
-  const ns=DATA.nodes.filter(visible);const k=70;
-  for(let it=0;it<60;it++){
-    const dx=new Map(ns.map(n=>[n.id,0])),dy=new Map(ns.map(n=>[n.id,0]));
-    for(let i=0;i<ns.length;i++)for(let j=i+1;j<ns.length;j++){
-      const a=ns[i],b=ns[j];let ddx=a.x-b.x,ddy=a.y-b.y;let d=Math.hypot(ddx,ddy)||1;
-      const rep=k*k/d/d*18;dx.set(a.id,dx.get(a.id)+ddx/d*rep);dy.set(a.id,dy.get(a.id)+ddy/d*rep);
-      dx.set(b.id,dx.get(b.id)-ddx/d*rep);dy.set(b.id,dy.get(b.id)-ddy/d*rep);}
-    DATA.edges.forEach(e=>{if(!edgeVisible(e))return;const a=nodeById.get(e.s),b=nodeById.get(e.t);
-      let ddx=a.x-b.x,ddy=a.y-b.y;let d=Math.hypot(ddx,ddy)||1;const at=d/k*(e.type==="contradiction"?.2:1)*e.score;
-      dx.set(a.id,dx.get(a.id)-ddx/d*at);dy.set(a.id,dy.get(a.id)-ddy/d*at);
-      dx.set(b.id,dx.get(b.id)+ddx/d*at);dy.set(b.id,dy.get(b.id)+ddy/d*at);});
-    ns.forEach(n=>{n.x+=Math.max(-8,Math.min(8,dx.get(n.id)));n.y+=Math.max(-8,Math.min(8,dy.get(n.id)));});
-  }
-  redraw();
-};
+/* ---------------- force layout (client-side, tunable) ---------------- */
+function forceStep(){
+  const ns=DATA.nodes.filter(visible); if(ns.length<2)return;
+  const k=70; const dx=new Map(),dy=new Map(); let cx=0,cy=0;
+  for(const n of ns){dx.set(n.id,0);dy.set(n.id,0);cx+=n.x;cy+=n.y;} cx/=ns.length;cy/=ns.length;
+  for(let i=0;i<ns.length;i++)for(let j=i+1;j<ns.length;j++){
+    const a=ns[i],b=ns[j];let ddx=a.x-b.x,ddy=a.y-b.y;let d=Math.hypot(ddx,ddy)||1;
+    const rep=k*k/d/d*TUNE.rep;dx.set(a.id,dx.get(a.id)+ddx/d*rep);dy.set(a.id,dy.get(a.id)+ddy/d*rep);
+    dx.set(b.id,dx.get(b.id)-ddx/d*rep);dy.set(b.id,dy.get(b.id)-ddy/d*rep);}
+  DATA.edges.forEach(e=>{if(!edgeVisible(e))return;const a=nodeById.get(e.s),b=nodeById.get(e.t);
+    let ddx=a.x-b.x,ddy=a.y-b.y;let d=Math.hypot(ddx,ddy)||1;const at=d/k*(e.type==="contradiction"?.2:1)*e.score*TUNE.link;
+    dx.set(a.id,dx.get(a.id)-ddx/d*at);dy.set(a.id,dy.get(a.id)-ddy/d*at);
+    dx.set(b.id,dx.get(b.id)+ddx/d*at);dy.set(b.id,dy.get(b.id)+ddy/d*at);});
+  if(TUNE.grav>0)for(const n of ns){dx.set(n.id,dx.get(n.id)+(cx-n.x)*TUNE.grav);dy.set(n.id,dy.get(n.id)+(cy-n.y)*TUNE.grav);}
+  ns.forEach(n=>{n.x+=Math.max(-8,Math.min(8,dx.get(n.id)));n.y+=Math.max(-8,Math.min(8,dy.get(n.id)));});
+}
+$("#relax").onclick=()=>{for(let it=0;it<60;it++)forceStep();redraw();};
+let simRAF=null;
+function simLoop(){if(curView!=="graph"){setRun(false);return;}forceStep();redraw();simRAF=requestAnimationFrame(simLoop);}
+function setRun(on){ if(on){if(!simRAF)simLoop();} else if(simRAF){cancelAnimationFrame(simRAF);simRAF=null;}
+  const b=$("#tRun"); if(b){b.textContent=simRAF?"⏸ Pause":"▶ Run"; b.classList.toggle("on",!!simRAF);} }
+
+/* ---------------- tuning panel ---------------- */
+function tuneSync(){$("#vRep").textContent=TUNE.rep;$("#vLink").textContent=TUNE.link.toFixed(1);
+  $("#vGrav").textContent=TUNE.grav.toFixed(3);$("#vEdge").textContent=TUNE.edgeMin.toFixed(2);$("#vLab").textContent=TUNE.labDeg;}
+$("#tRep").value=TUNE.rep;$("#tLink").value=TUNE.link;$("#tGrav").value=TUNE.grav;$("#tEdge").value=TUNE.edgeMin;$("#tLab").value=TUNE.labDeg;tuneSync();
+$("#tRep").oninput=e=>{TUNE.rep=+e.target.value;tuneSync();};
+$("#tLink").oninput=e=>{TUNE.link=+e.target.value;tuneSync();};
+$("#tGrav").oninput=e=>{TUNE.grav=+e.target.value;tuneSync();};
+$("#tEdge").oninput=e=>{TUNE.edgeMin=+e.target.value;tuneSync();applyFilters();};
+$("#tLab").oninput=e=>{TUNE.labDeg=+e.target.value;tuneSync();if(!selected&&!selectedTheme)showHubLabels();};
+$("#tRun").onclick=()=>setRun(!simRAF);
+$("#tReset").onclick=()=>{DATA.nodes.forEach(n=>{n.x=n.x0;n.y=n.y0;updateNode(n);});redraw();};
+$("#tuneBtn").onclick=()=>{const p=$("#tunePanel");const show=p.style.display==="none";p.style.display=show?"":"none";$("#tuneBtn").classList.toggle("on",show);};
+$("#tuneClose").onclick=()=>{$("#tunePanel").style.display="none";$("#tuneBtn").classList.remove("on");setRun(false);};
 $("#reset").onclick=()=>{DATA.nodes.forEach(n=>{n.x=n.x0;n.y=n.y0;updateNode(n);});resetAllFilters();};
 $("#toggleTopics").onclick=()=>{showThemes=!showThemes;$("#toggleTopics").classList.toggle("on",showThemes);renderThemeLayer();};
 
