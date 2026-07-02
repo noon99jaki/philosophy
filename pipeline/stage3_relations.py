@@ -137,6 +137,7 @@ def fr_layout(n, edges, themes_idx, theme_keys, iterations=400, seed=7):
     else:
         Es = Et = np.array([], dtype=int); Ew = np.array([])
     anchor_pos = np.array([anchors[tk_i[themes_idx[i]]] for i in range(n)])
+    ti = np.array([tk_i[themes_idx[i]] for i in range(n)])   # node -> theme index
     if n > 300:
         iterations = 250                             # keep large graphs tractable
     temp = 2.2
@@ -151,7 +152,13 @@ def fr_layout(n, edges, themes_idx, theme_keys, iterations=400, seed=7):
             f = d / dl[:, None] * (dl * dl / k * Ew)[:, None]
             np.add.at(disp, Es, -f)
             np.add.at(disp, Et, f)
-        disp += (anchor_pos - pos) * 0.06             # theme gravity (vectorised)
+        disp += (anchor_pos - pos) * 0.30             # theme gravity (vectorised)
+        # pull toward the theme's CURRENT centroid too: unlike the fixed anchors this is
+        # translation-free, so it tightens each theme around wherever it naturally settles
+        sums = np.zeros((T, 2)); np.add.at(sums, ti, pos)
+        cnt = np.bincount(ti, minlength=T).astype(float)[:, None]
+        cent = sums / np.maximum(cnt, 1)
+        disp += (cent[ti] - pos) * 1.20
         length = np.linalg.norm(disp, axis=1, keepdims=True)
         length[length < 1e-6] = 1e-6
         pos += disp / length * np.minimum(length, temp)

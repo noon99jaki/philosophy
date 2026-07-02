@@ -85,10 +85,10 @@
   text.nodelabel{font-family:inherit;font-size:11px;fill:var(--ink);paint-order:stroke;stroke:#0c1116;stroke-width:3px;pointer-events:none}
   text.themelabel{font-family:inherit;font-size:14px;font-weight:600;letter-spacing:.7px;opacity:.82;paint-order:stroke;stroke:#0c1116;stroke-width:4px;text-transform:uppercase;pointer-events:auto;cursor:pointer;transition:opacity .12s}
   text.themelabel:hover{opacity:1}
+  text.themelabel.sel{opacity:1;font-size:16px;text-decoration:underline;text-underline-offset:4px}
   .btn.on{border-color:var(--gold);color:var(--gold2)}
-  /* live tuning panel */
-  #tunePanel{position:absolute;right:12px;top:44px;z-index:40;width:222px;font-size:12px;color:var(--ink);
-    background:rgba(12,17,22,.93);border:1px solid var(--line);border-radius:11px;padding:11px 12px;backdrop-filter:blur(5px)}
+  /* live tuning panel — lives at the bottom of the Detail pane so it never covers the graph */
+  #tunePanel{margin-top:14px;border-top:1px solid var(--line);padding:11px 15px 15px;font-size:12px;color:var(--ink)}
   #tunePanel h5{margin:0 0 4px;font-size:12.5px;color:var(--gold2);display:flex;justify-content:space-between;align-items:center}
   #tunePanel .tclose{cursor:pointer;color:var(--faint);font-size:14px}#tunePanel .tclose:hover{color:var(--gold2)}
   #tunePanel label{display:flex;justify-content:space-between;margin:9px 0 1px;color:var(--muted)}
@@ -242,18 +242,6 @@
         <svg id="graph"></svg>
         <div class="glegend" id="glegend"></div>
         <div class="ghint">drag nodes · scroll to zoom · pan background · <b style="color:var(--gold2)">double-click a node → original text</b></div>
-        <div id="tunePanel" style="display:none">
-          <h5>⚙ Live tuning <span class="tclose" id="tuneClose">✕</span></h5>
-          <div class="thd">Force layout</div>
-          <label>Repulsion <b id="vRep"></b></label><input type="range" id="tRep" min="5" max="80" step="1">
-          <label>Link pull <b id="vLink"></b></label><input type="range" id="tLink" min="0" max="3" step="0.1">
-          <label>Gravity <b id="vGrav"></b></label><input type="range" id="tGrav" min="0" max="0.08" step="0.002">
-          <div class="trow"><button class="btn" id="tRun">▶ Run</button><button class="btn" id="tReset">⟲ Positions</button></div>
-          <div class="thd">Display</div>
-          <label>Min edge strength <b id="vEdge"></b></label><input type="range" id="tEdge" min="0" max="1" step="0.01">
-          <label>Labels: degree ≥ <b id="vLab"></b></label><input type="range" id="tLab" min="0" max="20" step="1">
-          <div class="tnote">Live view/layout knobs. Corpus-level generation (similarity cutoff, cluster count, TF-IDF) is set in the Python pipeline.</div>
-        </div>
       </div>
       <div id="treeWrap"></div>
     </div>
@@ -261,6 +249,18 @@
       <div class="ph"><b style="color:var(--gold2)">Detail</b></div>
       <div class="empty" id="panelEmpty">Click a node, a tree card, or a bridge to inspect an idea — its source text, supporting quotation, and every concept it agrees or conflicts with.</div>
       <div class="pbody" id="panelBody" style="display:none"></div>
+      <div id="tunePanel" style="display:none">
+        <h5>⚙ Live tuning <span class="tclose" id="tuneClose">✕</span></h5>
+        <div class="thd">Force layout</div>
+        <label>Repulsion <b id="vRep"></b></label><input type="range" id="tRep" min="5" max="80" step="1">
+        <label>Link pull <b id="vLink"></b></label><input type="range" id="tLink" min="0" max="3" step="0.1">
+        <label>Gravity <b id="vGrav"></b></label><input type="range" id="tGrav" min="0" max="0.08" step="0.002">
+        <div class="trow"><button class="btn" id="tRun">▶ Run</button><button class="btn" id="tReset">⟲ Positions</button></div>
+        <div class="thd">Display</div>
+        <label>Min edge strength <b id="vEdge"></b></label><input type="range" id="tEdge" min="0" max="1" step="0.01">
+        <label>Labels: degree ≥ <b id="vLab"></b></label><input type="range" id="tLab" min="0" max="20" step="1">
+        <div class="tnote">Live view/layout knobs. Corpus-level generation (similarity cutoff, cluster count, TF-IDF) is set in the Python pipeline.</div>
+      </div>
     </aside>
   </div>
 
@@ -285,7 +285,7 @@ DATA.edges.forEach(e=>{ adj.get(e.s).push(e); adj.get(e.t).push(e); });
 DATA.nodes.forEach(n=>{ n.x0=n.x; n.y0=n.y; });
 let activeCivs = new Set(DATA.civs);
 let activeRels = new Set(Object.keys(DATA.relTypes));
-const TUNE = {rep:18, link:1, grav:0.02, edgeMin:0, labDeg:10};   // live view/layout knobs
+const TUNE = {rep:18, link:1, grav:0.02, edgeMin:0.3, labDeg:1};   // live view/layout knobs
 let selected = null;
 let selectedTheme = null;
 function withYear(n){return n && n.year ? `${n.label} (${n.year})` : (n ? n.label : "");}
@@ -428,17 +428,46 @@ const themeVis=DATA.themes.map(th=>{
   label.addEventListener("mousedown",ev=>ev.stopPropagation());
   label.addEventListener("click",ev=>{ev.stopPropagation();selectTheme(th);});
   gThemeLabels.append(label);
-  return {label,ids:themeMembers[th.key]||[]};
+  return {key:th.key,label,ids:themeMembers[th.key]||[]};
 });
+/* emphasize one theme's overlay label (dim the rest); key=null restores all */
+function emphasizeTheme(key){
+  for(const t of themeVis){
+    t.label.style.opacity = key==null ? "" : (t.key===key ? 1 : .15);
+    t.label.classList.toggle("sel", t.key===key);
+  }
+}
 function renderThemeLayer(){
+  const placed=[];                                 // label boxes already placed this frame
   for(const t of themeVis){
     const pts=t.ids.map(id=>nodeById.get(id)).filter(visible);
     if(!showThemes||pts.length<2){t.label.style.display="none";continue;}
-    let cx=0, minY=Infinity;                       // label sits above the top of its cluster
-    for(const p of pts){cx+=p.x; if(p.y<minY)minY=p.y;} cx/=pts.length;
+    // Themes have far-flung stragglers (cross-theme edges pull them away), so anchoring
+    // the label to the topmost/centroid point can land it far from the visual cluster.
+    // Instead sit it on the DENSITY PEAK: the member with the most theme-mates nearby.
+    // scale-adaptive radius: the live sim can inflate/shrink the layout, so a fixed
+    // radius degenerates — tie it to the theme's own RMS spread instead
+    let cx=0,cy=0;for(const p of pts){cx+=p.x;cy+=p.y;}cx/=pts.length;cy/=pts.length;
+    let ms=0;for(const p of pts){const dx=p.x-cx,dy=p.y-cy;ms+=dx*dx+dy*dy;}
+    const R2=Math.max(60*60,ms/pts.length*.36);
+    let best=pts[0],bestScore=-1;
+    for(const p of pts){
+      let sc=0;
+      for(const q of pts){const dx=p.x-q.x,dy=p.y-q.y;if(dx*dx+dy*dy<R2)sc++;}
+      if(sc>bestScore){bestScore=sc;best=p;}
+    }
+    let lx=view.x+best.x*view.k, ly=view.y+best.y*view.k-16;
+    // greedy vertical nudge so labels never overprint each other
+    const w=t.label.textContent.length*9, h=20;
+    for(let guard=0;guard<10;guard++){
+      const hit=placed.find(b=>Math.abs(b.x-lx)*2<b.w+w&&Math.abs(b.y-ly)*2<b.h+h);
+      if(!hit)break;
+      ly=hit.y+(ly>=hit.y?(hit.h+h)/2+3:-((hit.h+h)/2+3));
+    }
+    placed.push({x:lx,y:ly,w,h});
     t.label.style.display="";
-    t.label.setAttribute("x", view.x+cx*view.k);
-    t.label.setAttribute("y", view.y+minY*view.k - 9);
+    t.label.setAttribute("x",lx);
+    t.label.setAttribute("y",ly);
   }
 }
 
@@ -477,13 +506,15 @@ function hideTip(){tip.style.opacity=0;}
 function neighbors(n){const s=new Set([n.id]);adj.get(n.id).forEach(e=>{if(activeRels.has(e.type)){s.add(e.s);s.add(e.t);}});return s;}
 function highlight(n){
   const keep=neighbors(n);
-  DATA.nodes.forEach(m=>{const vis=visible(m);m._c.style.opacity=vis?(keep.has(m.id)?1:.12):0;
+  // three tiers: neighbors full, same-theme half (shows the theme's spatial extent), rest dim
+  DATA.nodes.forEach(m=>{const vis=visible(m);m._c.style.opacity=vis?(keep.has(m.id)?1:(m.theme===n.theme?.5:.12)):0;
     m._lab.style.display=(vis&&(keep.has(m.id)&&(m.degree>=10||keep.size<14||m.id===n.id)))?"":"none";});
   DATA.edges.forEach(e=>{const on=(e.s===n.id||e.t===n.id)&&edgeVisible(e);
     e._ln.style.opacity=on?.95:(edgeVisible(e)?.05:0);
     e._ln.style.strokeWidth=on?((e.type==="equivalence"?2.4:1.8)*(0.5+e.score)):e._ln.style.strokeWidth;});
+  emphasizeTheme(n.theme);
 }
-function clearHi(){DATA.nodes.forEach(m=>{m._c.style.opacity=visible(m)?1:0;});
+function clearHi(){emphasizeTheme(null);DATA.nodes.forEach(m=>{m._c.style.opacity=visible(m)?1:0;});
   DATA.edges.forEach(e=>{e._ln.style.opacity=edgeVisible(e)?(e.type==="similarity"?.32:.46):0;
     e._ln.style.strokeWidth=(e.type==="equivalence"?1.4:e.type==="contradiction"?1.2:0.9)*(0.5+e.score);});
   showHubLabels();}
@@ -582,8 +613,12 @@ function renderPanel(n){
   b.append(nl);
   const meta=el("div",{class:"meta"});
   const t1=el("span",{class:"tag"},n.civ);t1.style.borderColor=n.color;t1.style.color=n.color;
+  const th=DATA.themes.find(t=>t.key===n.theme);
+  const tTag=el("span",{class:"tag",title:"show the whole theme"},n.theme_label);
+  if(th){tTag.style.borderColor=th.color;tTag.style.color=th.color;tTag.style.cursor="pointer";
+    tTag.onclick=()=>selectTheme(th);}
   meta.append(t1,el("span",{class:"tag"},n.school),el("span",{class:"tag"},n.type),
-    el("span",{class:"tag"},n.theme_label),el("span",{class:"tag"},"stance: "+n.stance));
+    tTag,el("span",{class:"tag"},"stance: "+n.stance));
   b.append(meta);
   b.append(stmtRow("“"+n.text+"”", {text:n.text, lang:"en-US"}, "ptext"));                    // English statement + voice
   if(n.stmt.native) b.append(stmtRow(n.stmt.native, {text:n.stmt.native, lang:n.stmt.lang}, "pntext")); // native statement + voice
@@ -623,6 +658,7 @@ function highlightTheme(th){
     m._lab.style.display=(vis&&keep.has(m.id))?"":"none";});
   DATA.edges.forEach(e=>{const on=keep.has(e.s)&&keep.has(e.t)&&edgeVisible(e);
     e._ln.style.opacity=on?.85:(edgeVisible(e)?.04:0);});
+  emphasizeTheme(th.key);
 }
 function restoreHighlight(){ if(selected&&visible(selected))highlight(selected); else if(selectedTheme)highlightTheme(selectedTheme); else clearHi(); }
 function selectTheme(th){ if(curView!=="graph")setView("graph"); selected=null; selectedTheme=th; highlightTheme(th); renderThemePanel(th); }
@@ -772,7 +808,13 @@ function forceStep(){
     let ddx=a.x-b.x,ddy=a.y-b.y;let d=Math.hypot(ddx,ddy)||1;const at=d/k*(e.type==="contradiction"?.2:1)*e.score*TUNE.link;
     dx.set(a.id,dx.get(a.id)-ddx/d*at);dy.set(a.id,dy.get(a.id)-ddy/d*at);
     dx.set(b.id,dx.get(b.id)+ddx/d*at);dy.set(b.id,dy.get(b.id)+ddy/d*at);});
-  if(TUNE.grav>0)for(const n of ns){dx.set(n.id,dx.get(n.id)+(cx-n.x)*TUNE.grav);dy.set(n.id,dy.get(n.id)+(cy-n.y)*TUNE.grav);}
+  if(TUNE.grav>0){                                  // THEME gravity: pull each node toward its
+    const tc={};                                    // theme's centroid, so themes stay contiguous
+    for(const n of ns){const t=tc[n.theme]||(tc[n.theme]={x:0,y:0,c:0});t.x+=n.x;t.y+=n.y;t.c++;}
+    for(const n of ns){const t=tc[n.theme];
+      dx.set(n.id,dx.get(n.id)+(t.x/t.c-n.x)*TUNE.grav);dy.set(n.id,dy.get(n.id)+(t.y/t.c-n.y)*TUNE.grav);}
+    for(const n of ns){dx.set(n.id,dx.get(n.id)+(cx-n.x)*TUNE.grav*.15);dy.set(n.id,dy.get(n.id)+(cy-n.y)*TUNE.grav*.15);}
+  }
   ns.forEach(n=>{n.x+=Math.max(-8,Math.min(8,dx.get(n.id)));n.y+=Math.max(-8,Math.min(8,dy.get(n.id)));});
 }
 $("#relax").onclick=()=>{for(let it=0;it<60;it++)forceStep();redraw();};
@@ -792,7 +834,8 @@ $("#tEdge").oninput=e=>{TUNE.edgeMin=+e.target.value;tuneSync();applyFilters();}
 $("#tLab").oninput=e=>{TUNE.labDeg=+e.target.value;tuneSync();if(!selected&&!selectedTheme)showHubLabels();};
 $("#tRun").onclick=()=>setRun(!simRAF);
 $("#tReset").onclick=()=>{DATA.nodes.forEach(n=>{n.x=n.x0;n.y=n.y0;updateNode(n);});redraw();};
-$("#tuneBtn").onclick=()=>{const p=$("#tunePanel");const show=p.style.display==="none";p.style.display=show?"":"none";$("#tuneBtn").classList.toggle("on",show);};
+$("#tuneBtn").onclick=()=>{const p=$("#tunePanel");const show=p.style.display==="none";p.style.display=show?"":"none";$("#tuneBtn").classList.toggle("on",show);
+  if(show)p.scrollIntoView({behavior:"smooth",block:"nearest"});};
 $("#tuneClose").onclick=()=>{$("#tunePanel").style.display="none";$("#tuneBtn").classList.remove("on");setRun(false);};
 $("#reset").onclick=()=>{DATA.nodes.forEach(n=>{n.x=n.x0;n.y=n.y0;updateNode(n);});resetAllFilters();};
 $("#toggleTopics").onclick=()=>{showThemes=!showThemes;$("#toggleTopics").classList.toggle("on",showThemes);renderThemeLayer();};
