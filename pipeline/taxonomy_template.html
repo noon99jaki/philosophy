@@ -148,6 +148,10 @@
   .qe{display:block;font-size:12.5px;color:var(--muted);font-style:italic;margin-top:1px}
   a.pquote:hover .qe{color:var(--ink)}
   a.ev{display:block;text-decoration:none}a.ev:hover{color:var(--ink)}
+  sup.cites{margin-left:3px;letter-spacing:1px}
+  a.cite{font-size:10px;color:var(--gold2);border-bottom:none;padding:0 1px}
+  a.cite.en{color:var(--muted)}
+  a.cite:hover{color:var(--ink);text-decoration:underline}
   a.equote{display:block;text-decoration:none;margin-top:5px}
   a.equote .qo{font-size:12.5px}a.equote .qe{font-size:11px}
   .equote{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 7px;margin-top:5px}
@@ -614,11 +618,29 @@ function select(n){selected=n;selectedTheme=null;highlight(n);renderPanel(n);
 function cssId(s){return s.replace(/[^a-z0-9]/gi,"_");}
 
 /* scroll-to-text-fragment URL. `frag` is a snippet the pipeline VERIFIED is verbatim on the
-   landing page, so the highlight will actually land; browsers lacking the feature just open the page. */
+   linked page, so the highlight will actually land; browsers lacking the feature just open the page. */
 function srcHref(url, frag){
   if(!url||!frag) return url;
   const enc=encodeURIComponent(frag.trim()).replace(/-/g,"%2D").replace(/,/g,"%2C").replace(/&/g,"%26");
   return url + (url.includes("#")?"":"#:~:text="+enc);
+}
+/* best verified citation for a node's quote: original-language first (pipeline sorted),
+   falling back to the legacy landing-page fragment */
+function bestCite(n){
+  if(n.cites&&n.cites.length) return n.cites[0];
+  return n.frag?{url:n.source_url,frag:n.frag,lang:"en"}:null;
+}
+function citeMarks(n){                       // superscript 1 2 … one per verified source page
+  const w=el("sup",{class:"cites"});
+  (n.cites||[]).forEach((c,i)=>{
+    let host="source";try{host=new URL(c.url).hostname.replace(/^www\./,"");}catch(e){}
+    const a=el("a",{class:c.lang==="orig"?"cite":"cite en",href:srcHref(c.url,c.frag),
+                    target:"_blank",rel:"noopener",
+                    title:host+(c.lang==="orig"?" · highlights the original-language text"
+                                               :" · highlights the translation")},String(i+1));
+    a.onclick=ev=>ev.stopPropagation();
+    w.append(a);});
+  return w;
 }
 function renderPanel(n){
   $("#panelEmpty").style.display="none";const b=$("#panelBody");b.style.display="";b.innerHTML="";
@@ -639,16 +661,17 @@ function renderPanel(n){
   b.append(stmtRow("“"+n.text+"”", {text:n.text, lang:"en-US"}, "ptext"));                    // English statement + voice
   if(n.stmt.native) b.append(stmtRow(n.stmt.native, {text:n.stmt.native, lang:n.stmt.lang}, "pntext")); // native statement + voice
   if(n.speak.idea.text){const q=el("div",{class:"pquote2"});                                  // key term/quote + voice
-    const hl=!!n.frag;
-    q.append(el("a",{class:hl?"qo qlink":"qo",href:hl?srcHref(n.source_url,n.frag):n.source_url,target:"_blank",rel:"noopener",
-                     title:hl?"open the source and highlight this passage":"open the original source (this exact passage isn’t on the landing page to highlight)"},n.speak.idea.text));
+    const bc=bestCite(n);
+    const qa=el("a",{class:bc?"qo qlink":"qo",href:bc?srcHref(bc.url,bc.frag):n.source_url,target:"_blank",rel:"noopener",
+                     title:bc?"open the source and highlight this passage":"open the original source (this exact passage isn’t verified on any linked page)"},n.speak.idea.text);
+    const qw=el("span",{});qw.append(qa,citeMarks(n));q.append(qw);
     if(n.speak.idea.en) q.append(el("span",{class:"qe"},"“"+n.speak.idea.en+"”"));
     q.append(iconSpeak(n.speak.idea));
     b.append(q);}
   if(n.evidence&&n.evidence.length){b.append(el("h5",{},"From the source text — click to open in the source (⌖ = highlights on the page)"));
-    n.evidence.forEach(ev=>{const hl=!!ev.frag;
-      const a=el("a",{class:hl?"ev evhl":"ev",href:hl?srcHref(n.source_url,ev.frag):n.source_url,target:"_blank",rel:"noopener",
-                      title:hl?"open the source and highlight this sentence":"open the source"});
+    n.evidence.forEach(ev=>{const hl=!!ev.frag;const u=ev.url||n.source_url;
+      const a=el("a",{class:hl?"ev evhl":"ev",href:hl?srcHref(u,ev.frag):u,target:"_blank",rel:"noopener",
+                      title:hl?"open the exact source page and highlight this sentence":"open the source"});
       a.textContent="“"+ev.text+"”";b.append(a);});}
   b.append(el("a",{class:"srcbtn",href:n.source_url,target:"_blank",rel:"noopener"},"read the full original text in context"));
 
@@ -708,11 +731,11 @@ function quoteBlock(id){                     // dual-language quotation + a voic
   const eng = n.speak.idea.en || n.text;     // English counterpart of the term/quote (matched length)
   const w=el("div",{class:"qblock"});
   w.append(el("div",{class:"qname"}, withYear(n)+" · "+n.civ));
-  const line=el("div",{class:"qline"}); const hl=!!n.frag;
-  const oa=el("a",{class:hl?"qo2 qlink":"qo2",href:hl?srcHref(n.source_url,n.frag):n.source_url,target:"_blank",rel:"noopener",
-                   title:hl?"open the source and highlight this passage":"open the original source"}, orig);
+  const line=el("div",{class:"qline"}); const bc=bestCite(n);
+  const oa=el("a",{class:bc?"qo2 qlink":"qo2",href:bc?srcHref(bc.url,bc.frag):n.source_url,target:"_blank",rel:"noopener",
+                   title:bc?"open the source and highlight this passage":"open the original source"}, orig);
   oa.onclick=ev=>ev.stopPropagation();                 // open the source, don't also trigger the card's focus
-  line.append(oa, el("span",{class:"qe2"}, "“"+eng+"”"));
+  line.append(oa, citeMarks(n), el("span",{class:"qe2"}, "“"+eng+"”"));
   const btns=el("div",{class:"qbtns"});
   const bo=el("button",{class:"speakmini",title:"pronounce the original — "+langName(olang)}, "🔊 "+langName(olang));
   bo.onclick=ev=>{ev.stopPropagation(); speak(n.speak.idea);};

@@ -1303,7 +1303,7 @@ QUOTES = {
     "mozi.universal-love":  ("兼愛", "impartial, all-embracing love (jiān'ài)"),
     # India
     "upanishads.atman":     ("तत् त्वम् असि", "that thou art"),
-    "buddha.anicca":        ("sabbe saṅkhārā aniccā", "all conditioned things are impermanent"),
+    "buddha.anicca":        ("Sabbe saṅkhārā aniccā", "all conditioned things are impermanent"),
     "mahavira.ahimsa":      ("ahiṃsā paramo dharmaḥ", "non-violence is the highest law"),
     # Persia
     "zoroaster.free-choice":("humata · hūxta · huuaršta", "good thoughts, good words, good deeds"),
@@ -1311,13 +1311,267 @@ QUOTES = {
     "ecclesiastes.vanity":  ("הֲבֵל הֲבָלִים", "vanity of vanities"),
     "torah.neighbor":       ("וְאָהַבְתָּ לְרֵעֲךָ כָּמוֹךָ", "love your neighbor as yourself"),
     "torah.talion":         ("עַיִן תַּחַת עַיִן", "an eye for an eye"),
-    "torah.monotheism":     ("שְׁמַע יִשְׂרָאֵל יְהוָה אֱלֹהֵינוּ יְהוָה אֶחָד", "Hear, O Israel: the LORD our God, the LORD is one"),
-    "proverbs.fear":        ("רֵאשִׁית חָכְמָה יִרְאַת יְהוָה", "the beginning of wisdom is the fear of the LORD"),
+    "torah.monotheism":     ("שְׁמַע, יִשְׂרָאֵל: יְהוָה אֱלֹהֵינוּ, יְהוָה אֶחָד", "Hear, O Israel: the LORD our God, the LORD is one"),
+    "proverbs.fear":        ("תְּחִלַּת חָכְמָה, יִרְאַת יְהוָה", "the beginning of wisdom is the fear of the LORD"),
     # Egypt
     "ptahhotep.maat":       ("mꜣꜥt", "Maʿat — truth, justice and cosmic order"),
     # Mesopotamia
     "gilgamesh.mortality":  ("ša naqba īmuru", "he who saw the Deep"),
     "enuma.order":          ("Enūma eliš lā nabû šamāmū", "when on high the heavens had not been named"),
+}
+
+# --------------------------------------------------------------------------- citations
+# Per-quote citation pages: URLs where the quote appears VERBATIM (preferring pages
+# that carry the original language). Stage 1 downloads them; stage 2 verifies the
+# text is actually on each page and emits one citation marker per verified hit.
+# The thinker's main source page (and its crawled sub-pages) are always tried too.
+# An entry is either a bare URL (the quote's own text is verbatim there) or a
+# (URL, fragment) pair where `fragment` is the original-language wording as printed
+# on that page (used when the famous form differs from the attested wording).
+_P = "https://www.perseus.tufts.edu/hopper/text?doc="
+CITATIONS = {
+    # ---- Greece: Greek editions on Perseus (fromdoc pins the Greek text) ----
+    "heraclitus.flux":      [(_P + "Plat.+Crat.+402a&fromdoc=Perseus%3Atext%3A1999.01.0171",
+                              "πάντα χωρεῖ καὶ οὐδὲν μένει"),      # Plato's report of the flux doctrine
+                             ("https://en.wikipedia.org/wiki/Heraclitus", "πάντα ῥεῖ")],
+    "protagoras.measure":   [(_P + "Perseus%3Atext%3A1999.01.0257%3Abook%3D9%3Achapter%3D8",
+                              "πάντων χρημάτων μέτρον")],          # D.L. 9.51 (a footnote splits the line)
+    "socrates.examined":    [(_P + "Plat.+Apol.+38a&fromdoc=Perseus%3Atext%3A1999.01.0169",
+                              "ἀνεξέταστος βίος οὐ βιωτὸς ἀνθρώπῳ")],
+    "socrates.ignorance":   [(_P + "Plat.+Apol.+21d&fromdoc=Perseus%3Atext%3A1999.01.0169",
+                              "ἃ μὴ οἶδα οὐδὲ οἴομαι εἰδέναι")],   # the attested wording behind the paraphrase
+    "parmenides.being":     [("https://en.wikipedia.org/wiki/Parmenides",
+                              "τὸ γὰρ αὐτὸ νοεῖν ἐστίν τε καὶ εἴναι")],   # DK B3 as printed there
+    "aristotle.mean":       [(_P + "Aristot.+Nic.+Eth.+1106b&fromdoc=Perseus%3Atext%3A1999.01.0053",
+                              "μεσότης")],
+    "plato.forms":          [(_P + "Plat.+Rep.+10.596a&fromdoc=Perseus%3Atext%3A1999.01.0167",
+                              "εἶδος γάρ πού τι")],
+    # ---- China: the exact chapter pages ----
+    # (zh.wikisource prints the variant forms 爲/僞/脩/饑/无 — the fragments below are
+    #  the wording exactly as it appears on the cited page)
+    "confucius.goldenrule": [CT + "analects/wei-ling-gong"],
+    "confucius.governvirtue": [(CT + "analects/wei-zheng", "為政以德，譬如北辰")],   # 論語·為政
+    "laozi.nameless": [(CT + "dao-de-jing", "無名天地之始")],
+    "sunzi.deception": [(CT + "art-of-war/laying-plans", "兵者，詭道也")],           # 孫子·始計
+    "sunzi.avoid-strength": [(CT + "art-of-war/weak-points-and-strong", "避實而擊虛")],  # 孫子·虛實
+    "hanfeizi.law-above-all": ["https://zh.wikisource.org/wiki/%E9%9F%93%E9%9D%9E%E5%AD%90/%E6%9C%89%E5%BA%A6"],  # 韓非子·有度: 法不阿貴
+    "zhuangzi.perspective": [(CT + "zhuangzi/adjustment-of-controversies", "昔者莊周夢為胡蝶"),
+                             ("https://zh.wikisource.org/wiki/%E8%8E%8A%E5%AD%90/%E9%BD%8A%E7%89%A9%E8%AB%96",
+                              "昔者莊周夢爲胡蝶")],                 # Wikisource prints 爲 for 為
+    "mencius.good": ["https://zh.wikisource.org/wiki/%E5%AD%9F%E5%AD%90/%E5%91%8A%E5%AD%90%E4%B8%8A"],  # 孟子·告子上
+    "mencius.mandate": ["https://zh.wikisource.org/wiki/%E5%AD%9F%E5%AD%90/%E9%9B%A2%E5%A9%81%E4%B8%8A"],  # 孟子·離婁上
+    "mencius.four-sprouts": ["https://zh.wikisource.org/wiki/%E5%AD%9F%E5%AD%90/%E5%85%AC%E5%AD%AB%E4%B8%91%E4%B8%8A"],  # 孟子·公孫丑上
+    "mencius.child-well": [("https://zh.wikisource.org/wiki/%E5%AD%9F%E5%AD%90/%E5%85%AC%E5%AD%AB%E4%B8%91%E4%B8%8A",
+                            "乍見孺子將入於井")],                   # 孟子·公孫丑上
+    "mencius.benevolent-gov": ["https://zh.wikisource.org/wiki/%E5%AD%9F%E5%AD%90/%E9%9B%A2%E5%A9%81%E4%B8%8A"],  # 孟子·離婁上
+    "mencius.people-first": ["https://zh.wikisource.org/wiki/%E5%AD%9F%E5%AD%90/%E7%9B%A1%E5%BF%83%E4%B8%8B"],  # 孟子·盡心下
+    "mencius.haoran-qi": ["https://zh.wikisource.org/wiki/%E5%AD%9F%E5%AD%90/%E5%85%AC%E5%AD%AB%E4%B8%91%E4%B8%8A"],  # 孟子·公孫丑上
+    "mencius.righteousness": ["https://zh.wikisource.org/wiki/%E5%AD%9F%E5%AD%90/%E5%91%8A%E5%AD%90%E4%B8%8B"],  # 孟子·告子下
+    "mencius.become-sage": ["https://zh.wikisource.org/wiki/%E5%AD%9F%E5%AD%90/%E5%91%8A%E5%AD%90%E4%B8%8B"],  # 孟子·告子下
+    "xunzi.heaven": ["https://zh.wikisource.org/wiki/%E8%8D%80%E5%AD%90/%E5%A4%A9%E8%AB%96%E7%AF%87"],  # 荀子·天論篇
+    "xunzi.ritual-reform": [("https://zh.wikisource.org/wiki/%E8%8D%80%E5%AD%90/%E6%80%A7%E6%83%A1%E7%AF%87",
+                             "化性而起僞")],                       # 荀子·性惡篇
+    "xunzi.effort": [("https://zh.wikisource.org/wiki/%E8%8D%80%E5%AD%90/%E6%80%A7%E6%83%A1%E7%AF%87",
+                      "人之性惡，其善者僞也")],                    # 荀子·性惡篇
+    "xunzi.learning": ["https://zh.wikisource.org/wiki/%E8%8D%80%E5%AD%90/%E5%8B%B8%E5%AD%B8%E7%AF%87"],  # 荀子·勸學篇
+    "xunzi.master-heaven": ["https://zh.wikisource.org/wiki/%E8%8D%80%E5%AD%90/%E5%A4%A9%E8%AB%96%E7%AF%87"],  # 荀子·天論篇
+    "xunzi.names": ["https://zh.wikisource.org/wiki/%E8%8D%80%E5%AD%90/%E6%AD%A3%E5%90%8D%E7%AF%87"],  # 荀子·正名篇
+    "mozi.utility": [("https://zh.wikisource.org/wiki/%E5%A2%A8%E5%AD%90/%E5%85%BC%E6%84%9B%E4%B8%AD",
+                      "交相利")],                                  # 墨子·兼愛中
+    "mozi.three-tests": [("https://zh.wikisource.org/wiki/%E5%A2%A8%E5%AD%90/%E9%9D%9E%E5%91%BD%E4%B8%8A",
+                          "言必有三表")],                          # 墨子·非命上
+    "shangyang.selfish": [("https://zh.wikisource.org/wiki/%E5%95%86%E5%90%9B%E6%9B%B8/%E5%8D%B7%E4%BA%8C",
+                           "饑而求食，勞而求佚，苦則索樂，辱則求榮")],   # 商君書·算地 (卷二)
+    "shangyang.harsh-punishment": ["https://zh.wikisource.org/wiki/%E5%95%86%E5%90%9B%E6%9B%B8/%E5%8D%B7%E5%9B%9B"],  # 商君書·卷四
+    "shangyang.collective-responsibility": [("https://zh.wikisource.org/wiki/%E5%95%86%E5%90%9B%E6%9B%B8/%E5%8D%B7%E5%9B%9B",
+                                             "罪死不赦，刑及三族")],  # 商君書·賞刑 (卷四)
+    "hanfeizi.law": [("https://zh.wikisource.org/wiki/%E9%9F%93%E9%9D%9E%E5%AD%90/%E6%9C%89%E5%BA%A6",
+                      "以法治國")],                                # 韓非子·有度
+    "hanfeizi.distrust": [("https://zh.wikisource.org/wiki/%E9%9F%93%E9%9D%9E%E5%AD%90/%E5%85%AD%E5%8F%8D",
+                           "猶用計算之心以相待也")],               # 韓非子·六反
+    "hanfeizi.two-handles": [("https://zh.wikisource.org/wiki/%E9%9F%93%E9%9D%9E%E5%AD%90/%E4%BA%8C%E6%9F%84",
+                              "二柄者，刑德也")],                  # 韓非子·二柄
+    "hanfeizi.power": [("https://zh.wikisource.org/wiki/%E9%9F%93%E9%9D%9E%E5%AD%90/%E9%9B%A3%E5%8B%A2",
+                        "抱法處勢則治")],                          # 韓非子·難勢
+    "hanfeizi.technique": [("https://zh.wikisource.org/wiki/%E9%9F%93%E9%9D%9E%E5%AD%90/%E5%AE%9A%E6%B3%95",
+                            "君無術則弊於上")],                    # 韓非子·定法
+    "hanfeizi.anti-antiquity": [("https://zh.wikisource.org/wiki/%E9%9F%93%E9%9D%9E%E5%AD%90/%E4%BA%94%E8%A0%B9",
+                                 "不期脩古")],                     # 韓非子·五蠹
+    "zhuangzi.butterfly": [("https://zh.wikisource.org/wiki/%E8%8E%8A%E5%AD%90/%E9%BD%8A%E7%89%A9%E8%AB%96",
+                            "昔者莊周夢爲胡蝶")],                  # 莊子·齊物論
+    "zhuangzi.useless": [("https://zh.wikisource.org/wiki/%E8%8E%8A%E5%AD%90/%E4%BA%BA%E9%96%93%E4%B8%96",
+                          "无用之用")],                            # 莊子·人間世
+    "zhuangzi.cook-ding": [("https://zh.wikisource.org/wiki/%E8%8E%8A%E5%AD%90/%E9%A4%8A%E7%94%9F%E4%B8%BB",
+                            "庖丁爲文惠君解牛")],                  # 莊子·養生主
+    "zhuangzi.death-natural": ["https://zh.wikisource.org/wiki/%E8%8E%8A%E5%AD%90/%E8%87%B3%E6%A8%82"],  # 莊子·至樂
+    "zhuangzi.mind-fasting": ["https://zh.wikisource.org/wiki/%E8%8E%8A%E5%AD%90/%E4%BA%BA%E9%96%93%E4%B8%96"],  # 莊子·人間世
+    "gongsunlong.names": ["https://zh.wikisource.org/wiki/%E5%85%AC%E5%AD%AB%E9%BE%8D%E5%AD%90/2"],  # 公孫龍子·白馬論
+    "gongsunlong.white-horse": ["https://zh.wikisource.org/wiki/%E5%85%AC%E5%AD%AB%E9%BE%8D%E5%AD%90/2"],  # 公孫龍子·白馬論
+    # ---- India ----
+    "upanishads.atman":     [("https://gretil.sub.uni-goettingen.de/gretil/1_sanskr/1_veda/4_upa/chup___u.htm",
+                              "tat tvam asi")],                    # Chāndogya 6.8.7 (IAST)
+    "buddha.anicca":        ["https://www.ancient-buddhist-texts.net/Texts-and-Translations/Dhammapada/20-Path.htm"],
+    "mahavira.ahimsa":      [("https://en.wikipedia.org/wiki/Ahimsa", "अहिंसा परमो धर्मः")],
+    # ---- Persia ----
+    "zoroaster.free-choice": [("https://www.avesta.org/yasna/y35to42.htm",
+                               "humatanãm hûxtanãm hvarshtanãm")], # Yasna 35.2, Geldner romanization
+    # ---- Israel: vowelized Masoretic text ----
+    "ecclesiastes.vanity":  ["https://mechon-mamre.org/p/pt/pt3101.htm"],
+    "torah.neighbor":       ["https://mechon-mamre.org/p/pt/pt0319.htm"],
+    "torah.talion":         ["https://mechon-mamre.org/p/pt/pt0221.htm"],
+    "torah.monotheism":     ["https://mechon-mamre.org/p/pt/pt0506.htm"],
+    "proverbs.fear":        ["https://mechon-mamre.org/p/pt/pt2809.htm"],
+    # ---- Egypt / Mesopotamia: romanized originals ----
+    "ptahhotep.maat":       ["https://en.wikipedia.org/wiki/Maat"],
+    "gilgamesh.mortality":  ["https://en.wikipedia.org/wiki/Epic_of_Gilgamesh"],
+    "enuma.order":          [("https://en.wikipedia.org/wiki/En%C5%ABma_Eli%C5%A1", "Enūma Eliš")],
+    # ---- Greece: swept term citations ----
+    "aristotle.actuality": [("https://en.wikipedia.org/wiki/Potentiality_and_actuality", "ἐνέργεια")],
+    "aristotle.categories": [("https://en.wikipedia.org/wiki/Categories_(Aristotle)", "Κατηγορίαι")],
+    "aristotle.catharsis": ["https://en.wikipedia.org/wiki/Catharsis"],
+    "aristotle.causes": [("https://en.wikipedia.org/wiki/Four_causes", "αἰτία")],
+    "aristotle.constitution": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D5%3Achapter%3D1"],
+    "aristotle.contemplation": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D5%3Achapter%3D2"],
+    "aristotle.eudaimonia": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D5%3Achapter%3D1"],
+    "aristotle.friendship": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D5%3Achapter%3D1"],
+    "aristotle.function": ["https://en.wikipedia.org/wiki/Ergon"],
+    "aristotle.hylomorphism": [("https://en.wikipedia.org/wiki/Hylomorphism", "ὕλη")],
+    "aristotle.justice-forms": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D5%3Achapter%3D1"],
+    "aristotle.logic": ["https://en.wikipedia.org/wiki/Syllogism"],
+    "aristotle.magnanimity": ["https://en.wikipedia.org/wiki/Magnanimity"],
+    "aristotle.mimesis": ["https://en.wikipedia.org/wiki/Mimesis"],
+    "aristotle.mover": [("https://en.wikipedia.org/wiki/Unmoved_mover", "πρῶτον κινοῦν")],
+    "aristotle.natural-slavery": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0057%3Abook%3D1%3Asection%3D1254b"],
+    "aristotle.noncontradiction": [("https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0051%3Abook%3D4%3Asection%3D1005b", "τὸ γὰρ αὐτὸ ἅμα ὑπάρχειν τε καὶ μὴ")],
+    "aristotle.phronesis": ["https://en.wikipedia.org/wiki/Phronesis"],
+    "aristotle.political": [("https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0057%3Abook%3D1%3Asection%3D1253a", "φύσει πολιτικὸν ζῷον")],
+    "aristotle.rhetoric": [("https://en.wikipedia.org/wiki/Ethos", "ἦθος")],
+    "aristotle.substance": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D7%3Achapter%3D7"],
+    "aristotle.time": [("https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D5%3Achapter%3D1", "χρόνον")],
+    "aristotle.void": ["https://en.wikipedia.org/wiki/Horror_vacui_(physics)"],
+    "democritus.atoms": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D9%3Achapter%3D7"],
+    "democritus.convention": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D9%3Achapter%3D7"],
+    "democritus.eidola": [("https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D9%3Achapter%3D7", "εἰδώλων")],
+    "democritus.euthymia": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D9%3Achapter%3D7"],
+    "democritus.necessity": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D9%3Achapter%3D7"],
+    "democritus.void": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D9%3Achapter%3D7"],
+    "diogenes.autarkeia": ["https://en.wikipedia.org/wiki/Autarky"],
+    "diogenes.parrhesia": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D6%3Achapter%3D2"],
+    "epicurus.ataraxia": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D10%3Achapter%3D1"],
+    "gorgias.nihilism": [("https://en.wikipedia.org/wiki/Gorgias", "nothing exists", "en")],
+    "gorgias.rhetoric": [("https://en.wikipedia.org/wiki/Encomium_of_Helen", "theory of logos", "en")],
+    "parmenides.one": [("https://en.wikipedia.org/wiki/Parmenides", "συνεχές")],
+    "plato.cave": [("https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0167%3Abook%3D7%3Asection%3D515a", "σπηλαίου")],
+    "plato.demiurge": ["https://en.wikipedia.org/wiki/Demiurge"],
+    "plato.dividedline": [("https://en.wikipedia.org/wiki/Analogy_of_the_divided_line", "γραμμὴ δίχα τετμημένη")],
+    "plato.eros": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D3%3Achapter%3D1"],
+    "plato.good": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D3%3Achapter%3D1"],
+    "plato.justice": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D3%3Achapter%3D1"],
+    "plato.knowledge-opinion": [("https://en.wikipedia.org/wiki/Episteme", "ἐπιστήμη")],
+    "plato.mathematics": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D4%3Achapter%3D2"],
+    "plato.noble-lie": ["https://en.wikipedia.org/wiki/Noble_lie"],
+    "plato.participation": ["https://en.wikipedia.org/wiki/Methexis"],
+    "plato.philosopher-death": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0169%3Atext%3DPhaedo%3Asection%3D81a"],
+    "plato.philosopherking": [("https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0167%3Abook%3D5%3Asection%3D473c", "οἱ φιλόσοφοι βασιλεύσωσιν")],
+    "plato.poetry-critique": ["https://en.wikipedia.org/wiki/Mimesis"],
+    "plato.recollection": ["https://en.wikipedia.org/wiki/Anamnesis_(philosophy)"],
+    "plato.soul": ["https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D3%3Achapter%3D1"],
+    "plato.tripartite-city": [("https://en.wikipedia.org/wiki/Plato%27s_tripartite_theory_of_soul", "λογιστικόν")],
+    "plato.two-worlds": [("https://en.wikipedia.org/wiki/Hyperuranion", "ὑπερουράνιος τόπος")],
+    "plato.women-guardians": [("https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0167%3Abook%3D5%3Asection%3D457d", "γυναῖκας")],
+    "plato.world-soul": [("https://en.wikipedia.org/wiki/Anima_mundi", "ψυχὴ κόσμου")],
+    "protagoras.agnostic": [("https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D9%3Achapter%3D8", "περὶ μὲν θεῶν οὐκ ἔχω")],
+    "protagoras.dissoi-logoi": ["https://en.wikipedia.org/wiki/Dissoi_logoi"],
+    "protagoras.teach-virtue": [("https://en.wikipedia.org/wiki/Meno", "ἀρετή")],
+    "socrates.maieutics": [("https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0171%3Atext%3DTheaet.%3Asection%3D149a", "μαίας")],
+    "thales.eclipse": [("https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0257%3Abook%3D1%3Achapter%3D1", "ἐκλείψεις")],
+    "xenophanes.onegod": [("https://en.wikipedia.org/wiki/Xenophanes", "one god greatest among gods and men", "en")],
+    "zenocitium.apatheia": ["https://en.wikipedia.org/wiki/Apatheia"],
+    "zenocitium.ekpyrosis": [("https://en.wikipedia.org/wiki/Stoicism", "Ekpyrosis")],
+    # ---- India: swept term citations ----
+    "buddha.aggregates": [("https://en.wikipedia.org/wiki/Skandha", "स्कन्ध")],
+    "buddha.anatta": ["https://en.wikipedia.org/wiki/Anatt%C4%81"],
+    "buddha.compassion": ["https://en.wikipedia.org/wiki/Karu%E1%B9%87%C4%81"],
+    "buddha.craving": ["https://en.wikipedia.org/wiki/Ta%E1%B9%87h%C4%81"],
+    "buddha.dependent-origination": ["https://en.wikipedia.org/wiki/Prat%C4%ABtyasamutp%C4%81da"],
+    "buddha.eightfold-path": [("https://en.wikipedia.org/wiki/Noble_Eightfold_Path", "ariya aṭṭhaṅgika magga")],
+    "buddha.fourtruths": ["https://en.wikipedia.org/wiki/Nirvana"],
+    "buddha.karma": ["https://en.wikipedia.org/wiki/Karma_in_Buddhism"],
+    "buddha.middleway": [("https://en.wikipedia.org/wiki/Middle_Way", "majjhimāpaṭipadā")],
+    "buddha.mindfulness": ["https://en.wikipedia.org/wiki/Sati_(Buddhism)"],
+    "buddha.nirvana": ["https://en.wikipedia.org/wiki/Nirvana"],
+    "buddha.poisoned-arrow": [("https://en.wikipedia.org/wiki/Parable_of_the_Poisoned_Arrow", "Cūḷamālukya")],
+    "buddha.three-marks": ["https://en.wikipedia.org/wiki/Three_marks_of_existence"],
+    "carvaka.consciousness-from-matter": [("https://en.wikipedia.org/wiki/Charvaka", "consciousness is an emergent property", "en")],
+    "carvaka.empiricism": ["https://en.wikipedia.org/wiki/Pramana"],
+    "carvaka.hedonism": ["https://en.wikipedia.org/wiki/Sukha"],
+    "carvaka.materialism": ["https://en.wikipedia.org/wiki/Charvaka"],
+    "gosala.determinism": [("https://en.wikipedia.org/wiki/Ajivika", "niyati")],
+    "gosala.fixed-cycle": [("https://en.wikipedia.org/wiki/Ajivika", "samsarasuddhi")],
+    "gosala.niyati": [("https://en.wikipedia.org/wiki/Ajivika", "niyati")],
+    "kapila.gunas": [("https://en.wikipedia.org/wiki/Gu%E1%B9%87a", "गुण")],
+    "kapila.liberation": ["https://en.wikipedia.org/wiki/Kaivalya"],
+    "kapila.no-creator": [("https://en.wikipedia.org/wiki/Samkhya", "nirīśvara")],
+    "kapila.prakriti": ["https://en.wikipedia.org/wiki/Prakriti"],
+    "kapila.purusha": ["https://en.wikipedia.org/wiki/Purusha"],
+    "mahavira.anekanta": ["https://en.wikipedia.org/wiki/Anekantavada"],
+    "mahavira.aparigraha": ["https://en.wikipedia.org/wiki/Aparigraha"],
+    "mahavira.jiva": ["https://en.wikipedia.org/wiki/Jiva"],
+    "mahavira.karma-matter": [("https://en.wikipedia.org/wiki/Pudgala", "पुद्गल")],
+    "mahavira.kevala": [("https://en.wikipedia.org/wiki/Kevala_jnana", "केवल ज्ञान")],
+    "mahavira.syadvada": ["https://en.wikipedia.org/wiki/Anekantavada"],
+    "panini.metarules": [("https://en.wikipedia.org/wiki/A%E1%B9%A3%E1%B9%AD%C4%81dhy%C4%81y%C4%AB", "paribhāṣā")],
+    "panini.zero": [("https://en.wikipedia.org/wiki/A%E1%B9%A3%E1%B9%AD%C4%81dhy%C4%81y%C4%AB", "lopa")],
+    "upanishads.aum": ["https://en.wikipedia.org/wiki/Om"],
+    "upanishads.brahman": ["https://en.wikipedia.org/wiki/Brahman"],
+    "upanishads.chariot": [("https://en.wikipedia.org/wiki/Katha_Upanishad", "chariot", "en")],
+    "upanishads.karma": ["https://en.wikipedia.org/wiki/Karma"],
+    "upanishads.moksha": ["https://en.wikipedia.org/wiki/Moksha"],
+    "upanishads.neti-neti": ["https://en.wikipedia.org/wiki/Neti_neti"],
+    "upanishads.samsara": ["https://en.wikipedia.org/wiki/Sa%E1%B9%83s%C4%81ra"],
+    "upanishads.satcitananda": ["https://en.wikipedia.org/wiki/Satcitananda"],
+    "upanishads.tat-tvam-asi": ["https://en.wikipedia.org/wiki/Mahāvākyas"],
+    "upanishads.two-birds": [("https://sa.wikisource.org/wiki/%E0%A4%AE%E0%A5%81%E0%A4%A3%E0%A5%8D%E0%A4%A1%E0%A4%95%E0%A5%8B%E0%A4%AA%E0%A4%A8%E0%A4%BF%E0%A4%B7%E0%A4%A4%E0%A5%8D", "द्वा सुपर्णा सयुजा सखाया")],
+    "upanishads.world-is-brahman": ["https://en.wikipedia.org/wiki/Mahāvākyas"],
+    "vedas.cosmic-person": ["https://en.wikipedia.org/wiki/Purusha_Sukta"],
+    "vedas.ekam-sat": [("https://sa.wikisource.org/wiki/%E0%A4%8B%E0%A4%97%E0%A5%8D%E0%A4%B5%E0%A5%87%E0%A4%A6%E0%A4%83_%E0%A4%B8%E0%A5%82%E0%A4%95%E0%A5%8D%E0%A4%A4%E0%A4%82_%E0%A5%A7.%E0%A5%A7%E0%A5%AC%E0%A5%AA", "एकं सद्विप्रा बहुधा वदन्त्")],
+    "vedas.nasadiya": [("https://sa.wikisource.org/wiki/%E0%A4%8B%E0%A4%97%E0%A5%8D%E0%A4%B5%E0%A5%87%E0%A4%A6%E0%A4%83_%E0%A4%B8%E0%A5%82%E0%A4%95%E0%A5%8D%E0%A4%A4%E0%A4%82_%E0%A5%A7%E0%A5%A6.%E0%A5%A7%E0%A5%A8%E0%A5%AF", "नासदासीन्नो सदासीत्")],
+    "vedas.rta": ["https://en.wikipedia.org/wiki/%E1%B9%9Ata"],
+    "vedas.tapas": ["https://en.wikipedia.org/wiki/Tapas_(Indian_religions)"],
+    "vedas.yajna": ["https://en.wikipedia.org/wiki/Yajna"],
+    # ---- Israel: swept term citations ----
+    "ecclesiastes.a-season": [("https://mechon-mamre.org/p/pt/pt3103.htm", "לַכֹּל, זְמָן")],
+    "ecclesiastes.enjoy": ["https://mechon-mamre.org/p/pt/pt3102.htm"],
+    "job.though-he-slay": ["https://mechon-mamre.org/p/pt/pt2713.htm"],
+    "job.whirlwind": ["https://mechon-mamre.org/p/pt/pt2738.htm"],
+    "prophets.care-poor": [("https://mechon-mamre.org/p/pt/pt1001.htm", "שִׁפְטוּ יָתוֹם")],
+    "prophets.messianic-peace": [("https://mechon-mamre.org/p/pt/pt1002.htm", "וְכִתְּתוּ חַרְבוֹתָם לְאִתִּים")],
+    "proverbs.lady-wisdom": [("https://mechon-mamre.org/p/pt/pt2808.htm", "הֲלֹא-חָכְמָה תִקְרָא")],
+    "proverbs.wisdom": [("https://mechon-mamre.org/p/pt/pt2804.htm", "חָכְמָה")],
+    "torah.covenant": ["https://mechon-mamre.org/p/pt/pt0109.htm"],
+    "torah.decalogue": [("https://mechon-mamre.org/p/pt/pt0234.htm", "עֲשֶׂרֶת, הַדְּבָרִים")],
+    "torah.imago-dei": ["https://mechon-mamre.org/p/pt/pt0101.htm"],
+    "torah.sabbath": ["https://mechon-mamre.org/p/pt/pt0216.htm"],
+    # ---- Egypt: swept term citations ----
+    "amenemope.honest-scales": [("https://en.wikipedia.org/wiki/Instruction_of_Amenemope", "For it is pleasant if thou keep them in thy belly", "en")],
+    "amenemope.silent-tree": [("https://en.wikipedia.org/wiki/Instruction_of_Amenemope", "silent man", "en")],
+    "bookdead.heart": [("https://en.wikipedia.org/wiki/Ancient_Egyptian_conception_of_the_soul", "the jb (ib), or heart")],
+    "bookofdead.afterlife-journey": [("https://en.wikipedia.org/wiki/Aaru", "sḫt-jꜣrw")],
+    "bookofdead.negative-confession": [("https://en.wikipedia.org/wiki/Isfet_(Egyptian_mythology)", "jzft")],
+    "dispute.death": [("https://en.wikipedia.org/wiki/Dispute_between_a_man_and_his_Ba", "between a man and his Ba", "en")],
+    "disputeba.name-forgotten": [("https://en.wikipedia.org/wiki/Ancient_Egyptian_conception_of_the_soul", "Ren (name, identity)")],
+    # ---- Mesopotamia: swept term citations ----
+    "gilgamesh.legacy": [("https://en.wikipedia.org/wiki/Epic_of_Gilgamesh", "Shūtur eli sharrī")],
+    "hammurabi.class-law": [("https://en.wikipedia.org/wiki/Code_of_Hammurabi", "awīlum")],
+    "hammurabi.divine-law": ["https://en.wikipedia.org/wiki/Code_of_Hammurabi"],
+    "hammurabi.talion": [("https://en.wikipedia.org/wiki/Code_of_Hammurabi", "mīšarum")],
+    "shuruppak.no-surety": [("https://etcsl.orinst.ox.ac.uk/section5/tr561.htm", "should not vouch", "en")],
+    "theodicy.suffering": [("https://en.wikipedia.org/wiki/Babylonian_Theodicy", "the shepherd Šamaš guides the peoples", "en")],
+    # ---- Persia: swept term citations ----
+    "zoroaster.good-triad": [("https://www.avesta.org/yasna/y35to42.htm", "humatanãm hûxtanãm hvarshtanãm")],
+    "zoroaster.judgment": [("https://en.wikipedia.org/wiki/Frashokereti", "frašō.kərəti")],
+    "zoroaster.renovation": [("https://en.wikipedia.org/wiki/Frashokereti", "frašō.kərəti")],
+    "heraclitus.hidden-harmony": [("https://en.wikisource.org/wiki/Fragments_of_Heraclitus", "The hidden attunement is better than the open", "en")],
 }
 
 # Native-language technical TERM (the "idea") for every concept without a full quote,

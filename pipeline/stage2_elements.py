@@ -11,7 +11,7 @@ import json
 
 import re
 from util import url_to_id, sentence_split, good_sentence, clean_corpus_text, html_to_text
-from knowledge import THEMES, THINKER, ELEMENTS, QUOTES, TERMS
+from knowledge import THEMES, THINKER, ELEMENTS, QUOTES, TERMS, CITATIONS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -95,6 +95,63 @@ def verified_frag(candidates, hay):
     return ""
 
 
+_META = None
+def source_pages(url):
+    """[(page_url, visible text), ...] for a source: its landing page plus every child
+    page stage 1 crawled (recorded in downloads.json, each saved under its own id)."""
+    global _META
+    if _META is None:
+        p = os.path.join(DATA, "downloads.json")
+        _META = json.load(open(p, encoding="utf-8")) if os.path.exists(p) else {}
+    uid = url_to_id(url)
+    pages = [(url, landing_text(uid))]
+    for c in _META.get(uid, {}).get("children", []):
+        t = landing_text(url_to_id(c))
+        if t:
+            pages.append((c, t))
+    return pages
+
+
+def quote_cites(el_id, quote, term, evidence, text, source):
+    """Verified citations for an element's quote: [{url, frag, lang}, ...].
+    Tries the curated CITATIONS pages first (an explicit fragment there is the
+    original-language wording as printed on that page), then the thinker's own
+    source landing page and each of its crawled sub-pages. Original-language
+    hits sort before translations; one citation per page."""
+    tagged = []                                   # (candidate text, lang) in preference order
+    if quote:
+        tagged.append((quote["o"], "orig"))
+    if term:
+        tagged.append((term[0], "orig"))
+    if quote:
+        tagged.append((quote["e"], "en"))
+    tagged += [(ev["text"], "en") for ev in evidence] + [(text, "en")]
+
+    cites = []
+    def try_page(url, hay, cands):
+        for cand, lang in cands:
+            f = verified_frag([cand], hay)
+            if f:
+                cites.append({"url": url, "frag": f, "lang": lang})
+                return
+
+    for c in CITATIONS.get(el_id, []):
+        # entry forms: url | (url, frag) | (url, frag, "en") — a bare fragment is
+        # the original-language wording unless explicitly tagged as translation
+        curl, cfrag, clang = (c, "", "orig") if isinstance(c, str) else (tuple(c) + ("orig",))[:3]
+        hay = landing_text(url_to_id(curl))
+        try_page(curl, hay, [(cfrag, clang)] if cfrag else tagged)
+    for purl, hay in source_pages(source):
+        try_page(purl, hay, tagged)
+
+    seen, out = set(), []
+    for c in sorted(cites, key=lambda c: c["lang"] != "orig"):   # originals first
+        if c["url"] not in seen:
+            seen.add(c["url"])
+            out.append(c)
+    return out[:4]
+
+
 def main():
     # ---- 1. sentence-level segmentation of the whole corpus (cached) -------
     # Segmenting the full corpus is the slowest step, but it only depends on
@@ -144,17 +201,22 @@ def main():
         if evidence:
             evidence_hits += 1
 
-        # verify highlight targets against the source's OWN landing page (not crawled children)
-        land = landing_text(uid)
+        # verify highlight targets on the exact page they appear on: the source's
+        # landing page, its crawled sub-pages, and the curated citation pages
+        pages = source_pages(source)
         for ev in evidence:
-            ev["frag"] = verified_frag([ev["text"]], land)
-        qcands = list(QUOTES[el["id"]]) if el["id"] in QUOTES else []
-        _term = TERMS.get(el["id"])
-        if _term:
-            qcands.append(_term[0])
-        qcands += [ev["text"] for ev in evidence] + [el["text"]]
-        quote_frag = verified_frag(qcands, land)
-        if quote_frag:
+            ev["frag"] = ""
+            for purl, hay in pages:
+                f = verified_frag([ev["text"]], hay)
+                if f:
+                    ev["source_url"], ev["frag"] = purl, f
+                    break
+        quote = ({"o": QUOTES[el["id"]][0], "e": QUOTES[el["id"]][1]}
+                 if el["id"] in QUOTES else None)
+        cites = quote_cites(el["id"], quote, TERMS.get(el["id"]), evidence, el["text"], source)
+        quote_frag = verified_frag([c["frag"] for c in cites if c["url"] == source],
+                                   landing_text(uid))
+        if cites:
             frag_hits += 1
 
         out.append({
@@ -170,10 +232,10 @@ def main():
             "school": school,
             "source_url": source,
             "keywords": sorted(toks),
-            "quote": ({"o": QUOTES[el["id"]][0], "e": QUOTES[el["id"]][1]}
-                      if el["id"] in QUOTES else None),
+            "quote": quote,
             "evidence": evidence,
-            "frag": quote_frag,   # verified verbatim snippet present on the linked page ("" if none)
+            "frag": quote_frag,   # verified snippet on the MAIN linked page ("" if none)
+            "cites": cites,       # verified citations: [{url, frag, lang: orig|en}, ...]
         })
 
     # integrity checks
@@ -191,7 +253,15 @@ def main():
     print(f"Elements: {len(out)}  across {len(civs)} civilizations")
     print("  " + "  ".join(f"{c}:{n}" for c, n in sorted(civs.items(), key=lambda x: -x[1])))
     print(f"Elements with textual evidence pulled from originals: {evidence_hits}/{len(out)}")
-    print(f"Elements whose quote is verifiably highlightable on the linked page: {frag_hits}/{len(out)}")
+    withq = [e for e in out if e["quote"]]
+    q_any = sum(1 for e in withq if e["cites"])
+    q_orig = sum(1 for e in withq if any(c["lang"] == "orig" for c in e["cites"]))
+    ev_tot = sum(len(e["evidence"]) for e in out)
+    ev_link = sum(1 for e in out for ev in e["evidence"] if ev["frag"])
+    print(f"Elements with a verified citation link: {frag_hits}/{len(out)}")
+    print(f"Curated quotes verified on a source page: {q_any}/{len(withq)} "
+          f"(in the original language: {q_orig})")
+    print(f"Evidence sentences with a verified highlight: {ev_link}/{ev_tot}")
     print("Wrote data/sentences.json, data/elements.json")
 
 

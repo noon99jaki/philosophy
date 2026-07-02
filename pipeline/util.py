@@ -1,6 +1,7 @@
 """Shared utilities for the philosophy taxonomy pipeline (stdlib only)."""
 import re
 import html
+import hashlib
 import unicodedata
 from html.parser import HTMLParser
 
@@ -65,7 +66,10 @@ def url_to_id(url: str) -> str:
     m = re.match(r"https?://([^/]+)(/.*)?$", url)
     host = (m.group(1) if m else url).replace("www.", "")
     path = (m.group(2) or "") if m else ""
-    return slugify(host + path)
+    s = slugify(host + path)
+    if len(s) >= 80:      # slug hit the cap: long URLs differing only near the end
+        s = s[:71] + "-" + hashlib.md5(url.encode()).hexdigest()[:8]   # would collide
+    return s
 
 
 # ---------------------------------------------------------------------------

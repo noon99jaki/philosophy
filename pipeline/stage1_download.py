@@ -7,6 +7,7 @@ data/raw/<id>.html (+ cleaned <id>.txt) and records status in data/downloads.jso
 """
 import os
 import re
+import sys
 import json
 import time
 from html.parser import HTMLParser
@@ -15,6 +16,7 @@ from urllib.parse import urljoin
 import requests
 
 from util import html_to_text, url_to_id
+from knowledge import CITATIONS
 
 MAX_CHILDREN = 45      # cap sub-pages crawled per table-of-contents source
 CHILD_DELAY = 0.35     # politeness between sub-page requests (seconds)
@@ -131,6 +133,11 @@ def download(url):
         r = requests.get(url, headers=HEADERS, timeout=18, allow_redirects=True)
         ct = r.headers.get("Content-Type", "")
         ok = r.status_code == 200 and ("html" in ct or "text" in ct or ct == "")
+        if ok and "charset" not in ct.lower():
+            # server sent no charset: trust the page's <meta charset>, default UTF-8
+            # (requests would otherwise assume ISO-8859-1 and mojibake non-Latin text)
+            m = re.search(rb'charset=["\']?([\w-]+)', r.content[:2048], re.I)
+            r.encoding = m.group(1).decode() if m else "utf-8"
         return {
             "status": "ok" if ok else f"http_{r.status_code}",
             "http_code": r.status_code, "content_type": ct,
@@ -142,7 +149,26 @@ def download(url):
                 "final_url": url, "bytes": 0, "html": "", "error": str(e)[:200]}
 
 
+def get(url, refresh, delay):
+    """Cached-or-network fetch. Reuses data/raw/<id>.html unless --refresh, saves the
+    HTML on a fresh download, and only sleeps when the network was actually hit."""
+    uid = url_to_id(url)
+    path = os.path.join(RAW, uid + ".html")
+    if not refresh and os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            html = f.read()
+        return {"status": "cached", "http_code": 200, "content_type": "text/html",
+                "final_url": url, "bytes": len(html.encode()), "html": html}
+    res = download(url)
+    if res["html"]:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(res["html"])
+    time.sleep(delay)
+    return res
+
+
 def main():
+    refresh = "--refresh" in sys.argv[1:]
     os.makedirs(RAW, exist_ok=True)
     records = parse_index()
     with open(os.path.join(DATA, "sources.json"), "w", encoding="utf-8") as f:
@@ -151,51 +177,60 @@ def main():
     unique = {}
     for r in records:
         unique.setdefault(r["url_id"], r["url"])
-    print(f"Listed source links: {len(records)}  |  unique URLs: {len(unique)}")
+    # per-quote citation pages (knowledge.CITATIONS) so stage 2 can verify the
+    # original-language quotes on the exact page they appear on
+    n_cites = 0
+    for entries in CITATIONS.values():
+        for c in entries:
+            u = c[0] if isinstance(c, tuple) else c   # entries are url or (url, fragment)
+            if url_to_id(u) not in unique:
+                n_cites += 1
+            unique.setdefault(url_to_id(u), u)
+    print(f"Listed source links: {len(records)}  |  unique URLs: {len(unique)} "
+          f"(incl. {n_cites} citation pages)")
 
     downloads = {}
     for n, (uid, url) in enumerate(sorted(unique.items()), 1):
-        res = download(url)
-        txt_path = html_path = ""
+        res = get(url, refresh, 0.6)
+        txt_path = ""
         chars = 0
-        n_children = 0
+        kept_children = []
         if res["html"]:
-            html_path = os.path.join(RAW, uid + ".html")
-            with open(html_path, "w", encoding="utf-8") as f:
-                f.write(res["html"])
             text = html_to_text(res["html"])
-            # if the landing page is a short table of contents, crawl its content sub-pages
+            # if the landing page is a short table of contents, crawl its content
+            # sub-pages; each child is saved under its own id so stage 2 can tell
+            # exactly which page a sentence came from (for verified deep links)
             children = expand_children(url, res["html"]) if len(text) < TOC_TEXT_MAX else []
             for c in children[:MAX_CHILDREN]:
-                cres = download(c)
+                cres = get(c, refresh, CHILD_DELAY)
                 if cres["html"]:
                     ctxt = html_to_text(cres["html"])
                     if len(ctxt) > 40:
                         text += "\n\n" + ctxt
-                        n_children += 1
-                time.sleep(CHILD_DELAY)
+                        kept_children.append(c)
             chars = len(text)
             txt_path = os.path.join(RAW, uid + ".txt")
             with open(txt_path, "w", encoding="utf-8") as f:
                 f.write(text)
+        html_path = os.path.join(RAW, uid + ".html") if res["html"] else ""
         downloads[uid] = {
             "url": url, "status": res["status"], "http_code": res["http_code"],
             "content_type": res["content_type"], "bytes": res["bytes"],
-            "text_chars": chars, "sub_pages": n_children,
+            "text_chars": chars, "sub_pages": len(kept_children),
+            "children": kept_children,
             "html_file": os.path.relpath(html_path, ROOT) if html_path else "",
             "text_file": os.path.relpath(txt_path, ROOT) if txt_path else "",
         }
         if "error" in res:
             downloads[uid]["error"] = res["error"]
-        flag = "OK " if res["status"] == "ok" else "•• "
-        sub = f" +{n_children} sub-pages" if n_children else ""
+        flag = "OK " if res["status"] in ("ok", "cached") else "•• "
+        sub = f" +{len(kept_children)} sub-pages" if kept_children else ""
         print(f"  [{n:2}/{len(unique)}] {flag}{res['status']:10} {chars:>8}c{sub}  {url}")
-        time.sleep(0.6)
 
     with open(os.path.join(DATA, "downloads.json"), "w", encoding="utf-8") as f:
         json.dump(downloads, f, ensure_ascii=False, indent=2)
 
-    ok = sum(1 for d in downloads.values() if d["status"] == "ok")
+    ok = sum(1 for d in downloads.values() if d["status"] in ("ok", "cached"))
     tot = sum(d["text_chars"] for d in downloads.values())
     print(f"\nDownloaded OK: {ok}/{len(unique)}  |  total text captured: {tot:,} chars")
     print("Wrote data/sources.json, data/downloads.json, data/raw/*")
