@@ -43,25 +43,33 @@ def kw_tokens(el):
 
 
 def main():
-    # ---- 1. sentence-level segmentation of the whole corpus ----------------
-    sentences = {}          # url_id -> [sentences]
-    sent_index = {}         # url_id -> list of (lower_sentence, original)
-    total = 0
-    for fn in sorted(os.listdir(RAW)):
-        if not fn.endswith(".txt"):
-            continue
-        uid = fn[:-4]
-        with open(os.path.join(RAW, fn), encoding="utf-8") as f:
-            text = clean_corpus_text(f.read())
-        good = [s for s in sentence_split(text) if good_sentence(s)]
-        good = good[:MAX_SENTENCES_PER_SOURCE]
-        if good:
-            sentences[uid] = good
-            sent_index[uid] = [(s.lower(), s) for s in good]
-            total += len(good)
-    with open(os.path.join(DATA, "sentences.json"), "w", encoding="utf-8") as f:
-        json.dump(sentences, f, ensure_ascii=False, indent=1)
-    print(f"Segmented corpus: {total:,} clean prose sentences from {len(sentences)} sources")
+    # ---- 1. sentence-level segmentation of the whole corpus (cached) -------
+    # Segmenting the full corpus is the slowest step, but it only depends on
+    # data/raw/*, which is unchanged when we merely edit knowledge.py. So reuse
+    # data/sentences.json unless a raw file is newer than it.
+    SENT_PATH = os.path.join(DATA, "sentences.json")
+    raw_mtime = max((os.path.getmtime(os.path.join(RAW, f))
+                     for f in os.listdir(RAW) if f.endswith(".txt")), default=0)
+    if os.path.exists(SENT_PATH) and os.path.getmtime(SENT_PATH) >= raw_mtime:
+        with open(SENT_PATH, encoding="utf-8") as f:
+            sentences = json.load(f)
+        total = sum(len(v) for v in sentences.values())
+        print(f"Segmented corpus: {total:,} sentences from {len(sentences)} sources (cached)")
+    else:
+        sentences = {}
+        for fn in sorted(os.listdir(RAW)):
+            if not fn.endswith(".txt"):
+                continue
+            with open(os.path.join(RAW, fn), encoding="utf-8") as f:
+                text = clean_corpus_text(f.read())
+            good = [s for s in sentence_split(text) if good_sentence(s)][:MAX_SENTENCES_PER_SOURCE]
+            if good:
+                sentences[fn[:-4]] = good
+        with open(SENT_PATH, "w", encoding="utf-8") as f:
+            json.dump(sentences, f, ensure_ascii=False, indent=1)
+        total = sum(len(v) for v in sentences.values())
+        print(f"Segmented corpus: {total:,} clean prose sentences from {len(sentences)} sources")
+    sent_index = {uid: [(s.lower(), s) for s in good] for uid, good in sentences.items()}
 
     # ---- 2. build the uniform element store --------------------------------
     out = []

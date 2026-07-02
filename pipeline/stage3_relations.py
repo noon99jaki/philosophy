@@ -126,29 +126,32 @@ def fr_layout(n, edges, themes_idx, theme_keys, iterations=400, seed=7):
     pos = np.array([anchors[tk_i[themes_idx[i]]] for i in range(n)], dtype=float)
     pos += rng.normal(0, 0.45, pos.shape)
     k = 0.9
-    A = np.zeros((n, n))
+    ew = {}                                           # unique undirected edges, max weight
     for s, t, w in edges:
-        A[s, t] = A[t, s] = max(A[s, t], w)
+        key = (s, t) if s < t else (t, s)
+        ew[key] = max(ew.get(key, 0.0), w)
+    if ew:
+        Es = np.array([e[0] for e in ew], dtype=int)
+        Et = np.array([e[1] for e in ew], dtype=int)
+        Ew = np.array(list(ew.values()), dtype=float)
+    else:
+        Es = Et = np.array([], dtype=int); Ew = np.array([])
+    anchor_pos = np.array([anchors[tk_i[themes_idx[i]]] for i in range(n)])
+    if n > 300:
+        iterations = 250                             # keep large graphs tractable
     temp = 2.2
     for _ in range(iterations):
-        disp = np.zeros_like(pos)
-        for i in range(n):
-            delta = pos[i] - pos                      # repulsion from all
-            dist = np.linalg.norm(delta, axis=1)
-            dist[dist < 0.01] = 0.01
-            rep = (k * k) / dist
-            rep[i] = 0
-            disp[i] += (delta / dist[:, None] * rep[:, None]).sum(0)
-        for i in range(n):                            # attraction along edges
-            for j in range(n):
-                if A[i, j]:
-                    delta = pos[i] - pos[j]
-                    d = np.linalg.norm(delta) + 1e-6
-                    disp[i] -= delta / d * (d * d / k) * A[i, j]
-        # theme gravity
-        for i in range(n):
-            a = anchors[tk_i[themes_idx[i]]]
-            disp[i] += (a - pos[i]) * 0.06
+        diff = pos[:, None, :] - pos[None, :, :]       # (n,n,2) repulsion, fully vectorised
+        dist = np.sqrt((diff * diff).sum(2)); dist[dist < 0.01] = 0.01
+        rep = (k * k) / dist; np.fill_diagonal(rep, 0.0)
+        disp = (diff * (rep / dist)[:, :, None]).sum(1)
+        if len(Es):                                   # attraction along edges only (O(E), vectorised)
+            d = pos[Es] - pos[Et]
+            dl = np.linalg.norm(d, axis=1); dl[dl < 1e-6] = 1e-6
+            f = d / dl[:, None] * (dl * dl / k * Ew)[:, None]
+            np.add.at(disp, Es, -f)
+            np.add.at(disp, Et, f)
+        disp += (anchor_pos - pos) * 0.06             # theme gravity (vectorised)
         length = np.linalg.norm(disp, axis=1, keepdims=True)
         length[length < 1e-6] = 1e-6
         pos += disp / length * np.minimum(length, temp)
