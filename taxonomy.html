@@ -252,13 +252,17 @@
       <div id="tunePanel" style="display:none">
         <h5>⚙ Live tuning <span class="tclose" id="tuneClose">✕</span></h5>
         <div class="thd">Force layout</div>
-        <label>Repulsion <b id="vRep"></b></label><input type="range" id="tRep" min="5" max="80" step="1">
+        <label>Repulsion <b id="vRep"></b></label><input type="range" id="tRep" min="1" max="10" step="1">
         <label>Link pull <b id="vLink"></b></label><input type="range" id="tLink" min="0" max="3" step="0.1">
         <label>Gravity <b id="vGrav"></b></label><input type="range" id="tGrav" min="0" max="0.08" step="0.002">
         <div class="trow"><button class="btn" id="tRun">▶ Run</button><button class="btn" id="tReset">⟲ Positions</button></div>
         <div class="thd">Display</div>
         <label>Min edge strength <b id="vEdge"></b></label><input type="range" id="tEdge" min="0" max="1" step="0.01">
         <label>Labels: degree ≥ <b id="vLab"></b></label><input type="range" id="tLab" min="0" max="20" step="1">
+        <div class="thd">Node size · relation weights</div>
+        <label><span style="color:#e3b341">Equivalence</span> <b id="vWEq"></b></label><input type="range" id="tWEq" min="0" max="3" step="0.1">
+        <label><span style="color:#6fb1c9">Similarity</span> <b id="vWSim"></b></label><input type="range" id="tWSim" min="0" max="3" step="0.1">
+        <label><span style="color:#e0524a">Contradiction</span> <b id="vWCon"></b></label><input type="range" id="tWCon" min="0" max="3" step="0.1">
         <div class="tnote">Live view/layout knobs. Corpus-level generation (similarity cutoff, cluster count, TF-IDF) is set in the Python pipeline.</div>
       </div>
     </aside>
@@ -285,7 +289,8 @@ DATA.edges.forEach(e=>{ adj.get(e.s).push(e); adj.get(e.t).push(e); });
 DATA.nodes.forEach(n=>{ n.x0=n.x; n.y0=n.y; });
 let activeCivs = new Set(DATA.civs);
 let activeRels = new Set(Object.keys(DATA.relTypes));
-const TUNE = {rep:18, link:1, grav:0.02, edgeMin:0.3, labDeg:1};   // live view/layout knobs
+const TUNE = {rep:5, link:1, grav:0.02, edgeMin:0.3, labDeg:0,
+              w:{equivalence:1, similarity:1, contradiction:1}};  // live view/layout knobs
 let selected = null;
 let selectedTheme = null;
 function withYear(n){return n && n.year ? `${n.label} (${n.year})` : (n ? n.label : "");}
@@ -493,7 +498,7 @@ function fitView(){
   view.x=w/2-view.k*(minx+maxx)/2; view.y=h/2-view.k*(miny+maxy)/2; redraw();
 }
 function showHubLabels(){const k=view.k;DATA.nodes.forEach(n=>{
-  n._lab.style.display=(visible(n)&&(k>=1.5||(n.degree>=TUNE.labDeg&&k>=0.9)))?"":"none";});}
+  n._lab.style.display=(visible(n)&&(k>=1.5||((n.ldeg??n.degree)>=TUNE.labDeg&&k>=0.9)))?"":"none";});}
 
 /* ---------------- interactions ---------------- */
 const tip=$("#tip");
@@ -508,7 +513,7 @@ function highlight(n){
   const keep=neighbors(n);
   // three tiers: neighbors full, same-theme half (shows the theme's spatial extent), rest dim
   DATA.nodes.forEach(m=>{const vis=visible(m);m._c.style.opacity=vis?(keep.has(m.id)?1:(m.theme===n.theme?.5:.12)):0;
-    m._lab.style.display=(vis&&(keep.has(m.id)&&(m.degree>=10||keep.size<14||m.id===n.id)))?"":"none";});
+    m._lab.style.display=(vis&&(keep.has(m.id)&&((m.ldeg??m.degree)>=10||keep.size<14||m.id===n.id)))?"":"none";});
   DATA.edges.forEach(e=>{const on=(e.s===n.id||e.t===n.id)&&edgeVisible(e);
     e._ln.style.opacity=on?.95:(edgeVisible(e)?.05:0);
     e._ln.style.strokeWidth=on?((e.type==="equivalence"?2.4:1.8)*(0.5+e.score)):e._ln.style.strokeWidth;});
@@ -545,7 +550,18 @@ let searchHit=null;
 function visible(n){ if(!activeCivs.has(n.civ))return false;
   if(searchHit && !searchHit.has(n.id))return false; return true; }
 function edgeVisible(e){return activeRels.has(e.type)&&e.score>=TUNE.edgeMin&&visible(nodeById.get(e.s))&&visible(nodeById.get(e.t));}
+/* LIVE degree: node size reflects only the currently visible edges (edge-strength
+   slider, relation/civ filters, search), each weighted by its relation type */
+function updateLiveDegrees(){
+  const d=new Map(); DATA.nodes.forEach(n=>d.set(n.id,0));
+  DATA.edges.forEach(e=>{if(edgeVisible(e)){const w=TUNE.w[e.type]??1;
+    d.set(e.s,d.get(e.s)+w);d.set(e.t,d.get(e.t)+w);}});
+  DATA.nodes.forEach(n=>{n.ldeg=d.get(n.id);
+    const r=4+Math.min(n.ldeg,16)*0.62;
+    if(r!==n._r){n._r=r;n._c.setAttribute("r",r);n._lab.setAttribute("y",project(n)[1]-r-6);}});
+}
 function applyFilters(){
+  updateLiveDegrees();
   DATA.nodes.forEach(n=>{const v=visible(n);n._c.style.display=v?"":"none";n._lab.style.display="none";});
   DATA.edges.forEach(e=>{e._ln.style.display=edgeVisible(e)?"":"none";});
   restoreHighlight();
@@ -825,13 +841,17 @@ function setRun(on){ if(on){if(!simRAF)simLoop();} else if(simRAF){cancelAnimati
 
 /* ---------------- tuning panel ---------------- */
 function tuneSync(){$("#vRep").textContent=TUNE.rep;$("#vLink").textContent=TUNE.link.toFixed(1);
-  $("#vGrav").textContent=TUNE.grav.toFixed(3);$("#vEdge").textContent=TUNE.edgeMin.toFixed(2);$("#vLab").textContent=TUNE.labDeg;}
-$("#tRep").value=TUNE.rep;$("#tLink").value=TUNE.link;$("#tGrav").value=TUNE.grav;$("#tEdge").value=TUNE.edgeMin;$("#tLab").value=TUNE.labDeg;tuneSync();
+  $("#vGrav").textContent=TUNE.grav.toFixed(3);$("#vEdge").textContent=TUNE.edgeMin.toFixed(2);$("#vLab").textContent=TUNE.labDeg;
+  $("#vWEq").textContent=TUNE.w.equivalence.toFixed(1);$("#vWSim").textContent=TUNE.w.similarity.toFixed(1);$("#vWCon").textContent=TUNE.w.contradiction.toFixed(1);}
+$("#tRep").value=TUNE.rep;$("#tLink").value=TUNE.link;$("#tGrav").value=TUNE.grav;$("#tEdge").value=TUNE.edgeMin;$("#tLab").value=TUNE.labDeg;
+$("#tWEq").value=TUNE.w.equivalence;$("#tWSim").value=TUNE.w.similarity;$("#tWCon").value=TUNE.w.contradiction;tuneSync();
 $("#tRep").oninput=e=>{TUNE.rep=+e.target.value;tuneSync();};
 $("#tLink").oninput=e=>{TUNE.link=+e.target.value;tuneSync();};
 $("#tGrav").oninput=e=>{TUNE.grav=+e.target.value;tuneSync();};
 $("#tEdge").oninput=e=>{TUNE.edgeMin=+e.target.value;tuneSync();applyFilters();};
 $("#tLab").oninput=e=>{TUNE.labDeg=+e.target.value;tuneSync();if(!selected&&!selectedTheme)showHubLabels();};
+const wSlider=(id,key)=>{$(id).oninput=e=>{TUNE.w[key]=+e.target.value;tuneSync();applyFilters();};};
+wSlider("#tWEq","equivalence");wSlider("#tWSim","similarity");wSlider("#tWCon","contradiction");
 $("#tRun").onclick=()=>setRun(!simRAF);
 $("#tReset").onclick=()=>{DATA.nodes.forEach(n=>{n.x=n.x0;n.y=n.y0;updateNode(n);});redraw();};
 $("#tuneBtn").onclick=()=>{const p=$("#tunePanel");const show=p.style.display==="none";p.style.display=show?"":"none";$("#tuneBtn").classList.toggle("on",show);
@@ -841,7 +861,7 @@ $("#reset").onclick=()=>{DATA.nodes.forEach(n=>{n.x=n.x0;n.y=n.y0;updateNode(n);
 $("#toggleTopics").onclick=()=>{showThemes=!showThemes;$("#toggleTopics").classList.toggle("on",showThemes);renderThemeLayer();};
 
 /* ---------------- go ---------------- */
-fitView(); showHubLabels(); renderTree(); renderHighlights();
+fitView(); updateLiveDegrees(); showHubLabels(); renderTree(); renderHighlights();
 window.addEventListener("resize",()=>{if(curView==="graph")fitView();});
 </script>
 </body>
