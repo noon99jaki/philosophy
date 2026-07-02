@@ -37,8 +37,10 @@ STOP = set("the a an and or of to in is are be that this with for as it its by o
            "have had been being more most such only own same may must each every there "
            "out up about itself other".split())
 
-CIV_COLOR = {"Mesopotamia": "#c9a24b", "Egypt": "#2fb8a8", "Israel": "#6c8bd5",
-             "Persia": "#dd6a3f", "India": "#e8902e", "China": "#d8443f", "Greece": "#9b87d4"}
+# seven well-separated hues (red/saffron/sand/teal/azure/violet/magenta) — green is
+# reserved for causation edges; China red, India saffron, Egypt teal stay as anchors
+CIV_COLOR = {"Mesopotamia": "#d9c34a", "Egypt": "#35c0ae", "Israel": "#9b7bf0",
+             "Persia": "#e35bb4", "India": "#f0912d", "China": "#e04f4a", "Greece": "#4f9df7"}
 
 
 def tokenize(s):

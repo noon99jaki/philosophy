@@ -295,8 +295,8 @@ DATA.edges.forEach(e=>{ adj.get(e.s).push(e); adj.get(e.t).push(e); });
 DATA.nodes.forEach(n=>{ n.x0=n.x; n.y0=n.y; });
 let activeCivs = new Set(DATA.civs);
 let activeRels = new Set(Object.keys(DATA.relTypes));
-const TUNE = {rep:5, link:1, grav:0.02, edgeMin:0.3, labDeg:0,
-              w:{equivalence:1, similarity:1, contradiction:1, causation:1}};  // live view/layout knobs
+const TUNE = {rep:2, link:1, grav:0.008, edgeMin:0.3, labDeg:0,
+              w:{equivalence:0, similarity:0, contradiction:0, causation:3}};  // live view/layout knobs
 let selected = null;
 let selectedTheme = null;
 function withYear(n){return n && n.year ? `${n.label} (${n.year})` : (n ? n.label : "");}
