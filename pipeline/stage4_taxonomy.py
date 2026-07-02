@@ -35,6 +35,7 @@ REL = {
     "equivalence":  {"color": "#e3b341", "label": "equivalence / agreement"},
     "similarity":   {"color": "#6fb1c9", "label": "similarity (discovered)"},
     "contradiction":{"color": "#e0524a", "label": "contradiction / debate"},
+    "causation":    {"color": "#7ac46e", "label": "causal grounding (cause → effect)"},
 }
 
 # Short topic labels for the graph overlay (the full labels are too long on the map).

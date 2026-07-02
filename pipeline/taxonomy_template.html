@@ -252,7 +252,7 @@
     </div>
     <aside class="panel" id="panel">
       <div class="ph"><b style="color:var(--gold2)">Detail</b></div>
-      <div class="empty" id="panelEmpty">Click a node, a tree card, or a bridge to inspect an idea — its source text, supporting quotation, and every concept it agrees or conflicts with.</div>
+      <div class="empty" id="panelEmpty">Click a node, a tree card, or a bridge to inspect an idea — its source text, supporting quotation, and every concept it grounds, agrees or conflicts with.</div>
       <div class="pbody" id="panelBody" style="display:none"></div>
       <div id="tunePanel" style="display:none">
         <h5>⚙ Live tuning <span class="tclose" id="tuneClose">✕</span></h5>
@@ -264,17 +264,18 @@
         <div class="thd">Display</div>
         <label>Min edge strength <b id="vEdge"></b></label><input type="range" id="tEdge" min="0" max="1" step="0.01">
         <label>Labels: degree ≥ <b id="vLab"></b></label><input type="range" id="tLab" min="0" max="20" step="1">
-        <div class="thd">Node size · relation weights</div>
+        <div class="thd">Relation weights · node size &amp; link pull</div>
         <label><span style="color:#e3b341">Equivalence</span> <b id="vWEq"></b></label><input type="range" id="tWEq" min="0" max="3" step="0.1">
         <label><span style="color:#6fb1c9">Similarity</span> <b id="vWSim"></b></label><input type="range" id="tWSim" min="0" max="3" step="0.1">
         <label><span style="color:#e0524a">Contradiction</span> <b id="vWCon"></b></label><input type="range" id="tWCon" min="0" max="3" step="0.1">
+        <label><span style="color:#7ac46e">Causation</span> <b id="vWCau"></b></label><input type="range" id="tWCau" min="0" max="3" step="0.1">
         <div class="tnote">Live view/layout knobs. Corpus-level generation (similarity cutoff, cluster count, TF-IDF) is set in the Python pipeline.</div>
       </div>
     </aside>
   </div>
 
   <footer>
-    <b>How this was built.</b> A four-stage pipeline: (1) <span class="mono">download</span> all sources from index.html in a uniform format; (2) <span class="mono">elementize</span> — segment the corpus into sentences and distill atomic concepts/rules; (3) <span class="mono">relate</span> — TF-IDF cosine similarity plus stance &amp; antonym logic classify equivalence / similarity / contradiction, and agglomerative clustering groups the ideas; (4) <span class="mono">visualize</span> this page. Equivalence/contradiction use curated <i>stance</i> labels documenting scholarly debates; similarity edges are discovered automatically from text. <span id="agree"></span>
+    <b>How this was built.</b> A four-stage pipeline: (1) <span class="mono">download</span> all sources from index.html in a uniform format; (2) <span class="mono">elementize</span> — segment the corpus into sentences and distill atomic concepts/rules; (3) <span class="mono">relate</span> — TF-IDF cosine similarity plus stance &amp; antonym logic classify equivalence / similarity / contradiction, curated directed links mark causal grounding (cause → effect within a tradition), and agglomerative clustering groups the ideas; (4) <span class="mono">visualize</span> this page. Equivalence/contradiction use curated <i>stance</i> labels documenting scholarly debates; similarity edges are discovered automatically from text. <span id="agree"></span>
     <br><br><b>A note on the native language.</b> Each idea's <i>key term / quote</i> — πάντα ῥεῖ, 道可道，非常道, תת… — is authentic text taken from the original sources (and its 🔊 uses that language's voice, with a romanized fallback where no voice exists). The fuller <i>native statement</i> shown beneath it is an <b>AI-generated modern translation</b> — Modern Greek, Mandarin, Hindi, Persian, Modern Hebrew, and Arabic for Egypt &amp; Mesopotamia (whose ancient tongues have no speech synthesis) — offered for reading and pronunciation, <i>not</i> as a sourced original; it may contain occasional phrasing errors.
   </footer>
 </div>
@@ -295,7 +296,7 @@ DATA.nodes.forEach(n=>{ n.x0=n.x; n.y0=n.y; });
 let activeCivs = new Set(DATA.civs);
 let activeRels = new Set(Object.keys(DATA.relTypes));
 const TUNE = {rep:5, link:1, grav:0.02, edgeMin:0.3, labDeg:0,
-              w:{equivalence:1, similarity:1, contradiction:1}};  // live view/layout knobs
+              w:{equivalence:1, similarity:1, contradiction:1, causation:1}};  // live view/layout knobs
 let selected = null;
 let selectedTheme = null;
 function withYear(n){return n && n.year ? `${n.label} (${n.year})` : (n ? n.label : "");}
@@ -402,13 +403,25 @@ const gEdges=svgEl("g",{}); const gNodes=svgEl("g",{}); const gLabels=svgEl("g",
 vp.append(gEdges,gNodes,gLabels); svg.append(vp);
 let view={x:0,y:0,k:1};
 
+const defs=svgEl("defs",{});
+const arrow=svgEl("marker",{id:"arrowC",viewBox:"0 0 10 10",refX:"9",refY:"5",
+                            markerWidth:"6.5",markerHeight:"6.5",orient:"auto-start-reverse"});
+const ap=svgEl("path",{d:"M0,0 L10,5 L0,10 z"});ap.style.fill=DATA.relTypes.causation.color;
+arrow.append(ap);defs.append(arrow);svg.append(defs);
+function nodeR(n){return 4+Math.min(n.degree,16)*0.62;}
 DATA.edges.forEach(e=>{
   const a=nodeById.get(e.s),b=nodeById.get(e.t);
-  const ln=svgEl("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y});
+  let x2=b.x,y2=b.y;
+  if(e.type==="causation"){                       // pull the tip back to the node's rim
+    const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,r=nodeR(b)+2;
+    x2=b.x-dx/d*r; y2=b.y-dy/d*r;
+  }
+  const ln=svgEl("line",{x1:a.x,y1:a.y,x2:x2,y2:y2});
   ln.style.stroke=DATA.relTypes[e.type].color;
   ln.style.strokeWidth=(e.type==="equivalence"?1.4:e.type==="contradiction"?1.2:0.9)*(0.5+e.score);
-  ln.style.strokeOpacity=e.type==="similarity"?.32:.46;
+  ln.style.strokeOpacity=e.type==="similarity"?.32:e.type==="causation"?.6:.46;
   if(e.type==="contradiction")ln.setAttribute("stroke-dasharray","5 4");
+  if(e.type==="causation")ln.setAttribute("marker-end","url(#arrowC)");
   e._ln=ln; gEdges.append(ln);
 });
 DATA.nodes.forEach(n=>{
@@ -685,15 +698,20 @@ function renderPanel(n){
   b.append(el("a",{class:"srcbtn",href:n.source_url,target:"_blank",rel:"noopener"},"read the full original text in context"));
 
   const es=adj.get(n.id).slice().sort((p,q)=>q.score-p.score);
-  const groups={equivalence:[],similarity:[],contradiction:[]};
+  const groups={equivalence:[],similarity:[],contradiction:[],causation:[]};
   es.forEach(e=>{const oid=e.s===n.id?e.t:e.s;groups[e.type].push([oid,e]);});
-  const marks={equivalence:"=",similarity:"≈",contradiction:"✕"};
-  ["equivalence","similarity","contradiction"].forEach(tp=>{
+  const marks={equivalence:"=",similarity:"≈",contradiction:"✕",causation:"→"};
+  ["causation","equivalence","similarity","contradiction"].forEach(tp=>{
     if(!groups[tp].length)return;
     b.append(el("h5",{},DATA.relTypes[tp].label+" ("+groups[tp].length+")"));
     groups[tp].forEach(([oid,e])=>{const m=nodeById.get(oid);
-      const row=el("div",{class:"rel"});const k=el("span",{class:"rk"},marks[tp]);k.style.color=DATA.relTypes[tp].color;
+      // causal edges are directed: → this grounds the other, ← the other grounds this
+      const mk=tp==="causation"?(e.s===n.id?"→":"←"):marks[tp];
+      const row=el("div",{class:"rel",title:e.rationale||""});
+      const k=el("span",{class:"rk"},mk);k.style.color=DATA.relTypes[tp].color;
       const tx=el("div");tx.append(el("div",{class:"rt"},withYear(m)+" · "+m.civ),el("div",{class:"rx"},m.text));
+      if(tp==="causation"&&e.rationale)tx.append(el("div",{class:"rx",style:"color:var(--muted);font-style:italic"},
+        (e.s===n.id?"⇒ ":"⇐ ")+e.rationale));
       row.append(k,tx);row.onclick=()=>select(m);b.append(row);});
   });
 }
@@ -853,7 +871,8 @@ function forceStep(){
     const rep=k*k/d/d*TUNE.rep;dx.set(a.id,dx.get(a.id)+ddx/d*rep);dy.set(a.id,dy.get(a.id)+ddy/d*rep);
     dx.set(b.id,dx.get(b.id)-ddx/d*rep);dy.set(b.id,dy.get(b.id)-ddy/d*rep);}
   DATA.edges.forEach(e=>{if(!edgeVisible(e))return;const a=nodeById.get(e.s),b=nodeById.get(e.t);
-    let ddx=a.x-b.x,ddy=a.y-b.y;let d=Math.hypot(ddx,ddy)||1;const at=d/k*(e.type==="contradiction"?.2:1)*e.score*TUNE.link;
+    let ddx=a.x-b.x,ddy=a.y-b.y;let d=Math.hypot(ddx,ddy)||1;
+    const at=d/k*(e.type==="contradiction"?.2:1)*(TUNE.w[e.type]??1)*e.score*TUNE.link;
     dx.set(a.id,dx.get(a.id)-ddx/d*at);dy.set(a.id,dy.get(a.id)-ddy/d*at);
     dx.set(b.id,dx.get(b.id)+ddx/d*at);dy.set(b.id,dy.get(b.id)+ddy/d*at);});
   if(TUNE.grav>0){                                  // THEME gravity: pull each node toward its
@@ -874,16 +893,17 @@ function setRun(on){ if(on){if(!simRAF)simLoop();} else if(simRAF){cancelAnimati
 /* ---------------- tuning panel ---------------- */
 function tuneSync(){$("#vRep").textContent=TUNE.rep;$("#vLink").textContent=TUNE.link.toFixed(1);
   $("#vGrav").textContent=TUNE.grav.toFixed(3);$("#vEdge").textContent=TUNE.edgeMin.toFixed(2);$("#vLab").textContent=TUNE.labDeg;
-  $("#vWEq").textContent=TUNE.w.equivalence.toFixed(1);$("#vWSim").textContent=TUNE.w.similarity.toFixed(1);$("#vWCon").textContent=TUNE.w.contradiction.toFixed(1);}
+  $("#vWEq").textContent=TUNE.w.equivalence.toFixed(1);$("#vWSim").textContent=TUNE.w.similarity.toFixed(1);
+  $("#vWCon").textContent=TUNE.w.contradiction.toFixed(1);$("#vWCau").textContent=TUNE.w.causation.toFixed(1);}
 $("#tRep").value=TUNE.rep;$("#tLink").value=TUNE.link;$("#tGrav").value=TUNE.grav;$("#tEdge").value=TUNE.edgeMin;$("#tLab").value=TUNE.labDeg;
-$("#tWEq").value=TUNE.w.equivalence;$("#tWSim").value=TUNE.w.similarity;$("#tWCon").value=TUNE.w.contradiction;tuneSync();
+$("#tWEq").value=TUNE.w.equivalence;$("#tWSim").value=TUNE.w.similarity;$("#tWCon").value=TUNE.w.contradiction;$("#tWCau").value=TUNE.w.causation;tuneSync();
 $("#tRep").oninput=e=>{TUNE.rep=+e.target.value;tuneSync();};
 $("#tLink").oninput=e=>{TUNE.link=+e.target.value;tuneSync();};
 $("#tGrav").oninput=e=>{TUNE.grav=+e.target.value;tuneSync();};
 $("#tEdge").oninput=e=>{TUNE.edgeMin=+e.target.value;tuneSync();applyFilters();};
 $("#tLab").oninput=e=>{TUNE.labDeg=+e.target.value;tuneSync();if(!selected&&!selectedTheme)showHubLabels();};
 const wSlider=(id,key)=>{$(id).oninput=e=>{TUNE.w[key]=+e.target.value;tuneSync();applyFilters();};};
-wSlider("#tWEq","equivalence");wSlider("#tWSim","similarity");wSlider("#tWCon","contradiction");
+wSlider("#tWEq","equivalence");wSlider("#tWSim","similarity");wSlider("#tWCon","contradiction");wSlider("#tWCau","causation");
 $("#tRun").onclick=()=>setRun(!simRAF);
 $("#tReset").onclick=()=>{DATA.nodes.forEach(n=>{n.x=n.x0;n.y=n.y0;updateNode(n);});redraw();};
 $("#tuneBtn").onclick=()=>{const p=$("#tunePanel");const show=p.style.display==="none";p.style.display=show?"":"none";$("#tuneBtn").classList.toggle("on",show);

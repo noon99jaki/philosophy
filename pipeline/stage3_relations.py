@@ -20,7 +20,7 @@ import json
 import itertools
 import numpy as np
 
-from knowledge import THEMES, OPPOSITIONS, CROSS_CONTRA, ANTONYMS, THINKER
+from knowledge import THEMES, OPPOSITIONS, CROSS_CONTRA, CAUSATION, ANTONYMS, THINKER
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -182,6 +182,12 @@ def main():
         if a in id2i and b in id2i:
             cross.add(frozenset((a, b)))
 
+    causal = set()                       # keep causal pairs out of the other classifiers
+    for a, b, _ in CAUSATION:
+        assert a in id2i, f"CAUSATION: unknown element {a}"
+        assert b in id2i, f"CAUSATION: unknown element {b}"
+        causal.add(frozenset((a, b)))
+
     relations = []
     sim_candidates = []  # (i,j,sim) to be filtered top-k
     for i, j in itertools.combinations(range(n), 2):
@@ -191,6 +197,8 @@ def main():
         same_stance = ei["stance"] == ej["stance"]
         pair = frozenset((ei["id"], ej["id"]))
 
+        if pair in causal:
+            continue
         if pair in cross:
             relations.append((i, j, "contradiction", round(max(sim, 0.5), 3),
                               "documented cross-theme debate"))
@@ -219,6 +227,11 @@ def main():
     for i, j, sim in keep:
         relations.append((i, j, "similarity", sim, "high TF-IDF cosine (discovered)"))
 
+    # curated causal / grounding links — DIRECTED: s is the cause, t the effect
+    for a, b, why in CAUSATION:
+        relations.append((id2i[a], id2i[b], "causation",
+                          round(max(float(S[id2i[a], id2i[b]]), 0.6), 3), why))
+
     # ---- unsupervised agglomerative clustering on cosine distance ----------
     D = 1.0 - S
     np.fill_diagonal(D, 0.0)
@@ -236,7 +249,8 @@ def main():
     for i, j, typ, w, _ in relations:
         deg[i] += 1
         deg[j] += 1
-        pull = {"equivalence": 1.0, "similarity": 0.7, "contradiction": 0.15}[typ]
+        pull = {"equivalence": 1.0, "similarity": 0.7, "contradiction": 0.15,
+                "causation": 0.9}[typ]
         edges_for_layout.append((i, j, pull * max(w, 0.2)))
 
     themes_idx = [e["theme"] for e in els]
