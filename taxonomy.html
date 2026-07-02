@@ -151,6 +151,7 @@
   sup.cites{margin-left:3px;letter-spacing:1px}
   a.cite{font-size:10px;color:var(--gold2);border-bottom:none;padding:0 1px}
   a.cite.en{color:var(--muted)}
+  a.cite.ai{color:var(--muted);font-size:9.5px}
   a.cite:hover{color:var(--ink);text-decoration:underline}
   a.equote{display:block;text-decoration:none;margin-top:5px}
   a.equote .qo{font-size:12.5px}a.equote .qe{font-size:11px}
@@ -640,6 +641,14 @@ function citeMarks(n){                       // superscript 1 2 … one per veri
                                                :" · highlights the translation")},String(i+1));
     a.onclick=ev=>ev.stopPropagation();
     w.append(a);});
+  // always end with a Google AI Mode search for the quote itself
+  const qt=(n.speak&&n.speak.idea&&n.speak.idea.text)||n.text;
+  let q='"'+qt+'" '+n.label;
+  if(n.speak&&n.speak.idea&&n.speak.idea.en&&n.speak.idea.en!==qt) q+=' "'+n.speak.idea.en+'"';
+  const ai=el("a",{class:"cite ai",href:"https://www.google.com/search?udm=50&q="+encodeURIComponent(q),
+                   target:"_blank",rel:"noopener",title:"ask Google AI Mode about this quote"},"✦AI");
+  ai.onclick=ev=>ev.stopPropagation();
+  w.append(ai);
   return w;
 }
 function renderPanel(n){
