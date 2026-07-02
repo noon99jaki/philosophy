@@ -135,6 +135,7 @@
   .panel .pquote{font-size:14px;color:var(--gold2);border-left:3px solid var(--gold);padding-left:10px;margin:8px 0}
   .panel h5{margin:14px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--faint)}
   .ev{font-size:12.5px;color:var(--muted);border-left:2px solid var(--line);padding-left:9px;margin:6px 0}
+  a.ev.evhl{border-left-color:var(--gold)}a.ev.evhl::before{content:"⌖ ";color:var(--gold)}
   .rel{display:flex;gap:8px;align-items:baseline;padding:6px 0;border-top:1px solid rgba(255,255,255,.04);cursor:pointer}
   .rel:hover .rt{color:var(--gold2)}
   .rel .rk{font-size:10px;width:13px;text-align:center}
@@ -185,6 +186,8 @@
   .qname{font-size:11px;color:var(--faint);margin-bottom:2px}
   .qline{font-size:12.5px;line-height:1.45}
   .qo2{color:var(--gold2);margin-right:7px}
+  a.qlink{color:inherit;text-decoration:none;cursor:pointer;border-bottom:1px dotted transparent;transition:border-color .12s}
+  a.qlink:hover{border-bottom-color:currentColor}
   .qe2{color:var(--muted);font-style:italic}
   .qbtns{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
   .hlnone{color:var(--faint);font-size:12.5px;font-style:italic;padding:6px 2px}
@@ -563,6 +566,13 @@ function select(n){selected=n;selectedTheme=null;highlight(n);renderPanel(n);
   if(curView==="tree"){const c=document.getElementById("card-"+cssId(n.id));if(c)c.scrollIntoView({behavior:"smooth",block:"center"});}}
 function cssId(s){return s.replace(/[^a-z0-9]/gi,"_");}
 
+/* scroll-to-text-fragment URL. `frag` is a snippet the pipeline VERIFIED is verbatim on the
+   landing page, so the highlight will actually land; browsers lacking the feature just open the page. */
+function srcHref(url, frag){
+  if(!url||!frag) return url;
+  const enc=encodeURIComponent(frag.trim()).replace(/-/g,"%2D").replace(/,/g,"%2C").replace(/&/g,"%26");
+  return url + (url.includes("#")?"":"#:~:text="+enc);
+}
 function renderPanel(n){
   $("#panelEmpty").style.display="none";const b=$("#panelBody");b.style.display="";b.innerHTML="";
   const nl=el("div",{class:"pnameline"});
@@ -578,13 +588,17 @@ function renderPanel(n){
   b.append(stmtRow("“"+n.text+"”", {text:n.text, lang:"en-US"}, "ptext"));                    // English statement + voice
   if(n.stmt.native) b.append(stmtRow(n.stmt.native, {text:n.stmt.native, lang:n.stmt.lang}, "pntext")); // native statement + voice
   if(n.speak.idea.text){const q=el("div",{class:"pquote2"});                                  // key term/quote + voice
-    q.append(el("span",{class:"qo"},n.speak.idea.text));
+    const hl=!!n.frag;
+    q.append(el("a",{class:hl?"qo qlink":"qo",href:hl?srcHref(n.source_url,n.frag):n.source_url,target:"_blank",rel:"noopener",
+                     title:hl?"open the source and highlight this passage":"open the original source (this exact passage isn’t on the landing page to highlight)"},n.speak.idea.text));
     if(n.speak.idea.en) q.append(el("span",{class:"qe"},"“"+n.speak.idea.en+"”"));
     q.append(iconSpeak(n.speak.idea));
     b.append(q);}
-  if(n.evidence&&n.evidence.length){b.append(el("h5",{},"From the source text — click to read in context"));
-    n.evidence.forEach(ev=>{const a=el("a",{class:"ev",href:n.source_url,target:"_blank",rel:"noopener"});
-      a.textContent="“"+ev+"”";b.append(a);});}
+  if(n.evidence&&n.evidence.length){b.append(el("h5",{},"From the source text — click to open in the source (⌖ = highlights on the page)"));
+    n.evidence.forEach(ev=>{const hl=!!ev.frag;
+      const a=el("a",{class:hl?"ev evhl":"ev",href:hl?srcHref(n.source_url,ev.frag):n.source_url,target:"_blank",rel:"noopener",
+                      title:hl?"open the source and highlight this sentence":"open the source"});
+      a.textContent="“"+ev.text+"”";b.append(a);});}
   b.append(el("a",{class:"srcbtn",href:n.source_url,target:"_blank",rel:"noopener"},"read the full original text in context"));
 
   const es=adj.get(n.id).slice().sort((p,q)=>q.score-p.score);
@@ -642,8 +656,11 @@ function quoteBlock(id){                     // dual-language quotation + a voic
   const eng = n.speak.idea.en || n.text;     // English counterpart of the term/quote (matched length)
   const w=el("div",{class:"qblock"});
   w.append(el("div",{class:"qname"}, withYear(n)+" · "+n.civ));
-  const line=el("div",{class:"qline"});
-  line.append(el("span",{class:"qo2"}, orig), el("span",{class:"qe2"}, "“"+eng+"”"));
+  const line=el("div",{class:"qline"}); const hl=!!n.frag;
+  const oa=el("a",{class:hl?"qo2 qlink":"qo2",href:hl?srcHref(n.source_url,n.frag):n.source_url,target:"_blank",rel:"noopener",
+                   title:hl?"open the source and highlight this passage":"open the original source"}, orig);
+  oa.onclick=ev=>ev.stopPropagation();                 // open the source, don't also trigger the card's focus
+  line.append(oa, el("span",{class:"qe2"}, "“"+eng+"”"));
   const btns=el("div",{class:"qbtns"});
   const bo=el("button",{class:"speakmini",title:"pronounce the original — "+langName(olang)}, "🔊 "+langName(olang));
   bo.onclick=ev=>{ev.stopPropagation(); speak(n.speak.idea);};
