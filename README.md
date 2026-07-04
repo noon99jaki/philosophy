@@ -1,5 +1,7 @@
 # Philosophy Taxonomy
 
+![Interactive constellation of pre-300 BCE ideas — nodes colored by civilization, green arrows marking causal grounding, with live force-layout tuning](docs/taxonomy-screenshot.png)
+
 A reproducible, dependency-light pipeline that turns the sources listed in
 [`index.html`](index.html) into an interactive map of ancient thought,
 [`taxonomy.html`](taxonomy.html).
