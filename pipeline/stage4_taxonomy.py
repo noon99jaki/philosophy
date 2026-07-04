@@ -145,6 +145,15 @@ def main():
             seen2[d["theme"]] = seen2.get(d["theme"], 0) + 1
     top_debates = top_debates[:14]
 
+    # user notes exported from the page (⤓ notes) and saved as data/notes.json are
+    # baked in as defaults; the browser's localStorage copy overrides them per idea
+    notes_path = os.path.join(DATA, "notes.json")
+    notes = {}
+    if os.path.exists(notes_path):
+        raw_notes = json.load(open(notes_path, encoding="utf-8"))
+        ids = {n["id"] for n in nodes}
+        notes = {k: v for k, v in raw_notes.items() if k in ids and isinstance(v, str) and v.strip()}
+
     payload = {
         "stats": graph["stats"],
         "themes": themes_out,
@@ -154,6 +163,7 @@ def main():
         "nodes": nodes,
         "edges": edges,
         "highlights": {"bridges": top_bridges, "debates": top_debates},
+        "notes": notes,
     }
 
     with open(os.path.join(DATA, "taxonomy.json"), "w", encoding="utf-8") as f:

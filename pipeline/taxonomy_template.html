@@ -83,6 +83,14 @@
   .tooltip{position:fixed;pointer-events:none;z-index:60;max-width:300px;padding:8px 11px;border-radius:9px;
     background:rgba(16,22,29,.97);border:1px solid var(--line);font-size:12.5px;color:var(--ink);opacity:0;transition:opacity .1s}
   text.nodelabel{font-family:inherit;font-size:11px;fill:var(--ink);paint-order:stroke;stroke:#0c1116;stroke-width:3px;pointer-events:none}
+  .nodenote{font-size:9.5px;line-height:1.35;color:var(--gold2);background:rgba(14,19,24,.82);
+    border-left:2px solid var(--gold);border-radius:0 4px 4px 0;padding:2px 5px;width:max-content;
+    max-width:150px;margin:0 auto;pointer-events:none;white-space:pre-wrap;overflow-wrap:break-word}
+  textarea.noteedit{width:100%;min-height:44px;margin-top:7px;padding:5px 7px;box-sizing:border-box;
+    background:var(--bg);color:var(--gold2);border:1px solid var(--line);border-radius:6px;
+    font:11.5px/1.4 inherit;font-family:inherit;resize:vertical}
+  textarea.noteedit::placeholder{color:var(--faint)}
+  textarea.noteedit:focus{outline:none;border-color:var(--gold)}
   text.themelabel{font-family:inherit;font-size:14px;font-weight:600;letter-spacing:.7px;opacity:.82;paint-order:stroke;stroke:#0c1116;stroke-width:4px;text-transform:uppercase;pointer-events:auto;cursor:pointer;transition:opacity .12s}
   text.themelabel:hover{opacity:1}
   text.themelabel.sel{opacity:1;font-size:16px;text-decoration:underline;text-underline-offset:4px}
@@ -226,6 +234,8 @@
     <button class="btn" id="relax">✦ Relax layout</button>
     <button class="btn" id="reset">⟲ Reset view</button>
     <button class="btn" id="tuneBtn">⚙ Tune</button>
+    <button class="btn" id="notedBtn" title="show only the ideas you have written a note on">✎ Noted only</button>
+    <button class="btn" id="notesBtn" title="download all your notes as notes.json — save it to data/notes.json so the pipeline bakes them into future builds">⤓ Notes</button>
   </div>
 
   <div class="filters">
@@ -440,6 +450,57 @@ DATA.nodes.forEach(n=>{
   c.addEventListener("dblclick",ev=>{ev.stopPropagation();if(n.source_url)window.open(n.source_url,"_blank","noopener");});
 });
 
+/* ---- user notes: persisted in localStorage, shown under the node with its label ---- */
+/* baked-in data/notes.json entries are defaults; the browser's localStorage copy wins per
+   idea (an empty-string entry there is a tombstone deleting a baked note) */
+const _lsNotes=(()=>{try{return JSON.parse(localStorage.getItem("philnotes"))||{}}catch(_){return{}}})();
+const NOTES=(()=>{const m=Object.assign({},DATA.notes||{});
+  for(const k in _lsNotes){if(_lsNotes[k])m[k]=_lsNotes[k];else delete m[k];}return m;})();
+const NOTE_W=150;
+function placeNote(n){ if(!n._note)return; const p=project(n);
+  n._note.setAttribute("x",p[0]-NOTE_W/2); n._note.setAttribute("y",p[1]+n._r+3); }
+function updateNoteSVG(n){
+  const txt=NOTES[n.id];
+  if(!txt){ if(n._note){n._note.remove();n._note=null;} return; }
+  if(!n._note){
+    const fo=svgEl("foreignObject",{width:NOTE_W,height:300});
+    fo.style.pointerEvents="none"; fo.style.display=n._lab.style.display;
+    const dv=document.createElementNS("http://www.w3.org/1999/xhtml","div");
+    dv.setAttribute("class","nodenote"); fo.append(dv);
+    n._note=fo; n._noteDiv=dv; gLabels.append(fo);
+  }
+  n._noteDiv.textContent=txt; placeNote(n);
+}
+function setLab(n,on){ const d=on?"":"none";
+  n._lab.style.display=d; if(n._note)n._note.style.display=d; }
+function setNote(id,txt){ txt=txt.replace(/\s+$/,"");
+  if(txt)NOTES[id]=txt; else delete NOTES[id];
+  if(txt)_lsNotes[id]=txt; else if((DATA.notes||{})[id])_lsNotes[id]=""; else delete _lsNotes[id];
+  try{localStorage.setItem("philnotes",JSON.stringify(_lsNotes))}catch(_){}
+  updateNoteSVG(nodeById.get(id));
+  document.querySelectorAll("textarea.noteedit").forEach(t=>{   // keep other open editors in sync
+    if(t.dataset.note===id&&t!==document.activeElement)t.value=NOTES[id]||"";});
+  if(notesOnly)applyFilters();                     // the noted-only view follows note edits live
+}
+$("#notedBtn").onclick=()=>{                      // filter the view to ideas that carry a note
+  notesOnly=!notesOnly;$("#notedBtn").classList.toggle("on",notesOnly);
+  applyFilters();if(curView==="graph")fitView();
+};
+$("#notesBtn").onclick=()=>{                      // persist to disk: download → save as data/notes.json
+  const blob=new Blob([JSON.stringify(NOTES,null,1)],{type:"application/json"});
+  const a=el("a",{href:URL.createObjectURL(blob),download:"notes.json"});
+  document.body.append(a);a.click();a.remove();
+};
+function noteEditor(id){
+  const ta=el("textarea",{class:"noteedit","data-note":id,placeholder:"✎ add your own note to this idea…"});
+  ta.value=NOTES[id]||"";
+  ta.onclick=ev=>ev.stopPropagation();
+  ta.onmousedown=ev=>ev.stopPropagation();
+  ta.oninput=()=>setNote(id,ta.value);
+  return ta;
+}
+DATA.nodes.forEach(updateNoteSVG);
+
 /* ---- topic overlay: superimpose the taxonomy themes as text labels only ---- */
 const gThemeLabels=svgEl("g",{}); vp.append(gThemeLabels);   // labels on top of everything
 let showThemes=true;
@@ -498,12 +559,16 @@ function renderThemeLayer(){
    constant (in screen px) — so zooming in spreads nodes apart and de-crowds them. */
 function project(n){return [view.x + n.x*view.k, view.y + n.y*view.k];}
 function redraw(){
-  for(const e of DATA.edges){const pa=project(nodeById.get(e.s)),pb=project(nodeById.get(e.t));
+  for(const e of DATA.edges){const b=nodeById.get(e.t);const pa=project(nodeById.get(e.s)),pb=project(b);
+    if(e.type==="causation"){                      // pull the arrow tip back to the node's rim
+      const dx=pb[0]-pa[0],dy=pb[1]-pa[1],d=Math.hypot(dx,dy)||1,r=b._r+2;
+      pb[0]-=dx/d*r; pb[1]-=dy/d*r;
+    }
     e._ln.setAttribute("x1",pa[0]);e._ln.setAttribute("y1",pa[1]);
     e._ln.setAttribute("x2",pb[0]);e._ln.setAttribute("y2",pb[1]);}
   for(const n of DATA.nodes){const p=project(n);
     n._c.setAttribute("cx",p[0]);n._c.setAttribute("cy",p[1]);
-    n._lab.setAttribute("x",p[0]);n._lab.setAttribute("y",p[1]-n._r-6);}
+    n._lab.setAttribute("x",p[0]);n._lab.setAttribute("y",p[1]-n._r-6);placeNote(n);}
   renderThemeLayer();
   if(!selected&&!selectedTheme)showHubLabels();   // reveal idea labels as you zoom in
 }
@@ -516,11 +581,11 @@ function fitView(){
   view.x=w/2-view.k*(minx+maxx)/2; view.y=h/2-view.k*(miny+maxy)/2; redraw();
 }
 function showHubLabels(){const k=view.k;DATA.nodes.forEach(n=>{
-  n._lab.style.display=(visible(n)&&(k>=1.5||((n.ldeg??n.degree)>=TUNE.labDeg&&k>=0.9)))?"":"none";});}
+  setLab(n,visible(n)&&(k>=1.5||((n.ldeg??n.degree)>=TUNE.labDeg&&k>=0.9)));});}
 
 /* ---------------- interactions ---------------- */
 const tip=$("#tip");
-function hover(n,ev){ if(!visible(n))return; highlight(n); n._lab.style.display="";
+function hover(n,ev){ if(!visible(n))return; highlight(n); setLab(n,true);
   tip.innerHTML=`<b>${n.label}</b>${n.year?` <span style="color:var(--faint)">(${n.year})</span>`:""} <span style="color:var(--muted)">${n.native}</span> · <span style="color:${n.color}">${n.civ}</span><br><span style="color:var(--gold2);font-size:11.5px">${n.theme_label} — ${n.stance}</span><br>${n.text}`;
   tip.style.opacity=1; moveTip(ev); }
 function moveTip(ev){tip.style.left=Math.min(ev.clientX+14,innerWidth-310)+"px";tip.style.top=(ev.clientY+16)+"px";}
@@ -531,7 +596,7 @@ function highlight(n){
   const keep=neighbors(n);
   // three tiers: neighbors full, same-theme half (shows the theme's spatial extent), rest dim
   DATA.nodes.forEach(m=>{const vis=visible(m);m._c.style.opacity=vis?(keep.has(m.id)?1:(m.theme===n.theme?.5:.12)):0;
-    m._lab.style.display=(vis&&(keep.has(m.id)&&((m.ldeg??m.degree)>=10||keep.size<14||m.id===n.id)))?"":"none";});
+    setLab(m,vis&&keep.has(m.id)&&((m.ldeg??m.degree)>=10||keep.size<14||m.id===n.id));});
   DATA.edges.forEach(e=>{const on=(e.s===n.id||e.t===n.id)&&edgeVisible(e);
     e._ln.style.opacity=on?.95:(edgeVisible(e)?.05:0);
     e._ln.style.strokeWidth=on?((e.type==="equivalence"?2.4:1.8)*(0.5+e.score)):e._ln.style.strokeWidth;});
@@ -558,14 +623,16 @@ svg.addEventListener("wheel",ev=>{ev.preventDefault();const r=svg.getBoundingCli
   const k2=Math.max(0.25,Math.min(16,view.k*f));
   view.x=mx-(mx-view.x)*(k2/view.k);view.y=my-(my-view.y)*(k2/view.k);view.k=k2;redraw();},{passive:false});
 
-function updateNode(n){const p=project(n);
+function updateNode(n){const p=project(n);placeNote(n);
   n._c.setAttribute("cx",p[0]);n._c.setAttribute("cy",p[1]);
   n._lab.setAttribute("x",p[0]);n._lab.setAttribute("y",p[1]-n._r-6);
   adj.get(n.id).forEach(e=>{const isS=e.s===n.id;e._ln.setAttribute(isS?"x1":"x2",p[0]);e._ln.setAttribute(isS?"y1":"y2",p[1]);});}
 
 /* ---------------- visibility / filters ---------------- */
 let searchHit=null;
+let notesOnly=false;
 function visible(n){ if(!activeCivs.has(n.civ))return false;
+  if(notesOnly && !NOTES[n.id])return false;
   if(searchHit && !searchHit.has(n.id))return false; return true; }
 function edgeVisible(e){return activeRels.has(e.type)&&e.score>=TUNE.edgeMin&&visible(nodeById.get(e.s))&&visible(nodeById.get(e.t));}
 /* LIVE degree: node size reflects only the currently visible edges (edge-strength
@@ -576,11 +643,11 @@ function updateLiveDegrees(){
     d.set(e.s,d.get(e.s)+w);d.set(e.t,d.get(e.t)+w);}});
   DATA.nodes.forEach(n=>{n.ldeg=d.get(n.id);
     const r=4+Math.min(n.ldeg,16)*0.62;
-    if(r!==n._r){n._r=r;n._c.setAttribute("r",r);n._lab.setAttribute("y",project(n)[1]-r-6);}});
+    if(r!==n._r){n._r=r;n._c.setAttribute("r",r);n._lab.setAttribute("y",project(n)[1]-r-6);placeNote(n);}});
 }
 function applyFilters(){
   updateLiveDegrees();
-  DATA.nodes.forEach(n=>{const v=visible(n);n._c.style.display=v?"":"none";n._lab.style.display="none";});
+  DATA.nodes.forEach(n=>{const v=visible(n);n._c.style.display=v?"":"none";setLab(n,false);});
   DATA.edges.forEach(e=>{e._ln.style.display=edgeVisible(e)?"":"none";});
   restoreHighlight();
   renderThemeLayer();                        // topic regions follow the visible nodes
@@ -590,6 +657,7 @@ function applyFilters(){
 function syncRelPills(){document.querySelectorAll('#relFilter .pill').forEach(p=>p.classList.toggle('off',!activeRels.has(p.dataset.rel)));}
 function syncCivPills(){document.querySelectorAll('#civFilter .pill').forEach(p=>p.classList.toggle('off',!activeCivs.has(p.dataset.civ)));}
 function resetAllFilters(){activeCivs=new Set(DATA.civs);activeRels=new Set(Object.keys(DATA.relTypes));
+  notesOnly=false;$("#notedBtn").classList.remove("on");
   syncCivPills();syncRelPills();$("#search").value="";searchHit=null;$("#matchcount").textContent="";selected=null;
   applyFilters();if(curView==="graph")fitView();showPanelEmpty();}
 function doStat(act){                                  // stat chips act as quick filters
@@ -696,6 +764,7 @@ function renderPanel(n){
                       title:hl?"open the exact source page and highlight this sentence":"open the source"});
       a.textContent="“"+ev.text+"”";b.append(a);});}
   b.append(el("a",{class:"srcbtn",href:n.source_url,target:"_blank",rel:"noopener"},"read the full original text in context"));
+  b.append(noteEditor(n.id));
 
   const es=adj.get(n.id).slice().sort((p,q)=>q.score-p.score);
   const groups={equivalence:[],similarity:[],contradiction:[],causation:[]};
@@ -721,7 +790,7 @@ function renderPanel(n){
 function highlightTheme(th){
   const keep=new Set(); th.stances.forEach(s=>s.ids.forEach(id=>keep.add(id)));
   DATA.nodes.forEach(m=>{const vis=visible(m);m._c.style.opacity=vis?(keep.has(m.id)?1:.1):0;
-    m._lab.style.display=(vis&&keep.has(m.id))?"":"none";});
+    setLab(m,vis&&keep.has(m.id));});
   DATA.edges.forEach(e=>{const on=keep.has(e.s)&&keep.has(e.t)&&edgeVisible(e);
     e._ln.style.opacity=on?.85:(edgeVisible(e)?.04:0);});
   emphasizeTheme(th.key);
@@ -844,6 +913,7 @@ function renderTree(){
         c.append(q);
         const src=el("a",{class:"cardsrc",href:n.source_url,target:"_blank",rel:"noopener"},"read in context");
         src.onclick=ev=>ev.stopPropagation();c.append(src);
+        c.append(noteEditor(id));
         c.onclick=()=>select(n); grid.append(c);});
       sd.append(grid);d.append(sd);
     });
