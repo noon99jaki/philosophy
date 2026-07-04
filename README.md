@@ -1,13 +1,14 @@
-# Philosophy Taxonomy Pipeline
+# Philosophy Taxonomy
 
 A reproducible, dependency-light pipeline that turns the sources listed in
-[`../index.html`](../index.html) into an interactive map of ancient thought,
-[`../taxonomy.html`](../taxonomy.html).
+[`index.html`](index.html) into an interactive map of ancient thought,
+[`taxonomy.html`](taxonomy.html).
 
 It (1) **downloads** every listed source in a uniform format, (2) breaks the corpus
-into **sentence-level elements** and distils atomic concepts/rules, (3) automatically
-identifies **similarity / equivalence / contradiction** between ideas, and
-(4) **visualizes** the clusters as an interactive constellation + a hierarchical taxonomy.
+into **sentence-level elements** and distils atomic concepts/rules, (3) identifies
+**similarity / equivalence / contradiction** between ideas plus curated directed
+**causal grounding** links, and (4) **visualizes** the clusters as an interactive
+constellation + a hierarchical taxonomy.
 
 ## Run it
 
@@ -29,11 +30,12 @@ Requirements: Python 3.9+, `numpy`, `requests`. No other third-party packages
 |---|--------|------|--------|
 | 1 | `stage1_download.py` | Parses the `<a class="src">` links out of `index.html`, downloads each unique URL with a browser UA, strips it to plain text. | `data/sources.json`, `data/downloads.json`, `data/raw/<id>.{html,txt}` |
 | 2 | `stage2_elements.py` | Segments the whole corpus into clean prose **sentences**; emits the curated **elements** (concept/claim/rule/method), each enriched with civ/school/native name, a link to the original text, and supporting sentences pulled from the downloaded corpus as *evidence*. | `data/sentences.json`, `data/elements.json` |
-| 3 | `stage3_relations.py` | Builds a TF-IDF vector per element, computes the cosine matrix, and classifies every pair as **equivalence / similarity / contradiction**; runs **agglomerative clustering** and a **force-directed layout**. | `data/relations.json`, `data/graph.json` |
+| 3 | `stage3_relations.py` | Builds a TF-IDF vector per element, computes the cosine matrix, and classifies every pair as **equivalence / similarity / contradiction**; adds the curated directed **causation** edges; runs **agglomerative clustering** and a **force-directed layout**. | `data/relations.json`, `data/graph.json` |
 | 4 | `stage4_taxonomy.py` | Merges everything, computes cross-cultural **bridges** and **debates**, injects the payload into `taxonomy_template.html`. | `data/taxonomy.json`, `../taxonomy.html` |
 
 `knowledge.py` holds the curated knowledge base: the **themes**, the **elements**, the
-**stance** of each element, the documented **oppositions**, and the thinker → original-text map.
+**stance** of each element, the documented **oppositions** and **causal chains**, and
+the thinker → original-text map.
 
 ## Uniform data schemas
 
@@ -63,6 +65,9 @@ Requirements: Python 3.9+, `numpy`, `requests`. No other third-party packages
   agreement, e.g. the Golden Rule in Confucius and Leviticus).
 * **contradiction** — opposed stances on a shared theme (per `OPPOSITIONS`), or a lexical
   **antonym cue**, or a documented cross-theme debate (`CROSS_CONTRA`).
+* **causation** — curated, *directed* cause → effect links (`CAUSATION`) marking where a
+  thinker derives one doctrine from another within a tradition (e.g. Epicurus: atoms and
+  void → death is nothing to fear → ataraxia). Drawn with green arrowheads.
 
 The `stance` labels encode mainstream scholarly readings so that *agreement* and
 *disagreement* can be separated; the cosine similarity and clustering are fully
